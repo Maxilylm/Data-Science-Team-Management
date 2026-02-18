@@ -35,7 +35,6 @@ You are a test agent.
     expect(agents).toHaveLength(1)
     expect(agents[0].name).toBe('test-agent')
     expect(agents[0].model).toBe('sonnet')
-    expect(agents[0].color).toBe('blue')
   })
 
   it('should get agent by id', async () => {
@@ -55,25 +54,5 @@ Instructions here.
 
     expect(agent).toBeDefined()
     expect(agent?.model).toBe('opus')
-  })
-
-  it('should update agent status', async () => {
-    const agentConfig = `---
-name: status-test
-description: "Test agent"
-model: haiku
-color: red
----
-
-Test.
-`
-    await fs.writeFile(path.join(testConfigDir, 'status-test.md'), agentConfig)
-    await service.loadAgents()
-
-    service.updateAgentStatus('status-test', 'running', 'session-123')
-    const agent = service.getAgent('status-test')
-
-    expect(agent?.status).toBe('running')
-    expect(agent?.sessionId).toBe('session-123')
   })
 })

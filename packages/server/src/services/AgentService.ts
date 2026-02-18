@@ -1,15 +1,13 @@
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import * as os from 'os'
-import type { Agent, AgentConfig, AgentStatus } from '../types/Agent'
+import type { Agent, AgentConfig } from '../types/Agent'
 
 export class AgentService {
   private agents: Map<string, Agent> = new Map()
   private configDir: string
 
   constructor(configDir?: string) {
-    const homeDir = process.env.HOME || os.homedir()
-    this.configDir = configDir || path.join(homeDir, '.claude', 'agents')
+    this.configDir = configDir || path.join(process.cwd(), '.claude', 'agents')
   }
 
   async loadAgents(): Promise<Agent[]> {
@@ -88,7 +86,7 @@ export class AgentService {
     return Array.from(this.agents.values())
   }
 
-  updateAgentStatus(id: string, status: AgentStatus, sessionId?: string | null): void {
+  updateAgentStatus(id: string, status: Agent['status'], sessionId?: string): void {
     const agent = this.agents.get(id)
     if (agent) {
       agent.status = status

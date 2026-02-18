@@ -2,13 +2,20 @@
   "name": "agent-team-dashboard",
   "version": "1.0.0",
   "private": true,
+  "bin": {
+    "agent-dashboard": "./bin/agent-dashboard.js"
+  },
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
     "dev": "concurrently \"npm run dev --workspace=server\" \"npm run dev --workspace=client\"",
     "build": "npm run build --workspaces",
+    "start": "node bin/agent-dashboard.js",
     "test": "npm run test --workspaces"
+  },
+  "dependencies": {
+    "open": "^10.0.0"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
