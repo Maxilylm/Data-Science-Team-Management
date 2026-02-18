@@ -7,6 +7,7 @@ import { KanbanBoard } from './components/KanbanBoard'
 import { PromptDialog } from './components/PromptDialog'
 import { InputRequired } from './components/InputRequired'
 import { LiveFeed } from './components/LiveFeed'
+import { CreateAgentDialog } from './components/CreateAgentDialog'
 import type { Agent } from './types'
 
 interface FeedEvent {
@@ -37,10 +38,11 @@ const headerStyle: React.CSSProperties = {
 }
 
 export default function App() {
-  const { agents, spawnAgent, stopAgent, sendInput } = useAgents()
+  const { agents, spawnAgent, stopAgent, sendInput, createAgent } = useAgents()
   const { kanbanData, tasksNeedingInput, refetch } = useTasks()
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
   const [feedEvents, setFeedEvents] = useState<FeedEvent[]>([])
+  const [showCreateDialog, setShowCreateDialog] = useState(false)
 
   const handleSSEMessage = useCallback((event: any) => {
     setFeedEvents(prev => [...prev, {
@@ -72,12 +74,25 @@ export default function App() {
     sendInput({ agentId, input })
   }
 
+  const handleCreateAgent = (agent: {
+    id: string
+    name: string
+    description: string
+    model?: string
+    color?: string
+    systemPrompt?: string
+  }) => {
+    createAgent(agent)
+    setShowCreateDialog(false)
+  }
+
   return (
     <div style={layoutStyle}>
       <AgentPanel
         agents={agents}
         onSpawnAgent={handleSpawnAgent}
         onStopAgent={handleStopAgent}
+        onCreateAgent={() => setShowCreateDialog(true)}
       />
 
       <div style={mainStyle}>
@@ -110,6 +125,12 @@ export default function App() {
         agent={selectedAgent}
         onSubmit={handleSubmitPrompt}
         onClose={() => setSelectedAgent(null)}
+      />
+
+      <CreateAgentDialog
+        isOpen={showCreateDialog}
+        onSubmit={handleCreateAgent}
+        onClose={() => setShowCreateDialog(false)}
       />
     </div>
   )

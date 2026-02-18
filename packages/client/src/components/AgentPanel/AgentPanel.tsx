@@ -5,6 +5,7 @@ interface AgentPanelProps {
   agents: Agent[]
   onSpawnAgent: (agentId: string) => void
   onStopAgent: (agentId: string) => void
+  onCreateAgent?: () => void
 }
 
 const panelStyle: React.CSSProperties = {
@@ -18,17 +19,34 @@ const panelStyle: React.CSSProperties = {
 
 const titleStyle: React.CSSProperties = {
   fontSize: '18px',
-  fontWeight: 600,
-  marginBottom: '16px'
+  fontWeight: 600
 }
 
-export default function AgentPanel({ agents, onSpawnAgent, onStopAgent }: AgentPanelProps) {
+export default function AgentPanel({ agents, onSpawnAgent, onStopAgent, onCreateAgent }: AgentPanelProps) {
   const runningAgents = agents.filter(a => a.status !== 'idle')
   const idleAgents = agents.filter(a => a.status === 'idle')
 
   return (
     <div style={panelStyle}>
-      <div style={titleStyle}>Agents</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <div style={titleStyle}>Agents</div>
+        {onCreateAgent && (
+          <button
+            onClick={onCreateAgent}
+            style={{
+              padding: '6px 12px',
+              backgroundColor: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '13px'
+            }}
+          >
+            + New
+          </button>
+        )}
+      </div>
 
       {runningAgents.length > 0 && (
         <>

@@ -13,6 +13,33 @@ export function createAgentsRouter(
     res.json(agents)
   })
 
+  // Create a new agent
+  router.post('/', async (req: Request, res: Response) => {
+    const { id, name, description, model, color, systemPrompt } = req.body
+
+    if (!id || !name || !description) {
+      res.status(400).json({ error: 'id, name, and description are required' })
+      return
+    }
+
+    // Check if agent already exists
+    if (agentService.getAgent(id)) {
+      res.status(409).json({ error: 'Agent with this ID already exists' })
+      return
+    }
+
+    try {
+      const agent = await agentService.createAgent(
+        id,
+        { name, description, model, color },
+        systemPrompt || `You are ${name}. ${description}`
+      )
+      res.status(201).json(agent)
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to create agent' })
+    }
+  })
+
   router.get('/:id', (req: Request, res: Response) => {
     const agent = agentService.getAgent(req.params.id)
     if (!agent) {

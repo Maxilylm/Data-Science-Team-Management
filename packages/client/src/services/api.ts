@@ -20,6 +20,21 @@ export const api = {
     return fetchJson(`${BASE_URL}/agents/${id}`)
   },
 
+  createAgent(agent: {
+    id: string
+    name: string
+    description: string
+    model?: string
+    color?: string
+    systemPrompt?: string
+  }): Promise<Agent> {
+    return fetchJson(`${BASE_URL}/agents`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(agent)
+    })
+  },
+
   spawnAgent(agentId: string, prompt: string, projectPath?: string): Promise<{ sessionId: string }> {
     return fetchJson(`${BASE_URL}/agents/${agentId}/spawn`, {
       method: 'POST',

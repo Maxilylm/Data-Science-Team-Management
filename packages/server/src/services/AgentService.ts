@@ -7,7 +7,39 @@ export class AgentService {
   private configDir: string
 
   constructor(configDir?: string) {
-    this.configDir = configDir || path.join(process.cwd(), '.claude', 'agents')
+    // Look for .claude/agents in project root (2 levels up from packages/server)
+    this.configDir = configDir || path.join(process.cwd(), '..', '..', '.claude', 'agents')
+  }
+
+  async createAgent(id: string, config: AgentConfig, systemPrompt: string): Promise<Agent> {
+    const filePath = path.join(this.configDir, `${id}.md`)
+
+    const content = `---
+name: ${config.name}
+description: "${config.description}"
+model: ${config.model || 'sonnet'}
+color: ${config.color || 'blue'}
+---
+
+${systemPrompt}
+`
+    await fs.mkdir(this.configDir, { recursive: true })
+    await fs.writeFile(filePath, content)
+
+    const agent: Agent = {
+      id,
+      name: config.name,
+      description: config.description,
+      model: config.model || 'sonnet',
+      color: config.color || 'blue',
+      status: 'idle',
+      sessionId: null,
+      configPath: filePath,
+      tools: config.tools
+    }
+
+    this.agents.set(id, agent)
+    return agent
   }
 
   async loadAgents(): Promise<Agent[]> {

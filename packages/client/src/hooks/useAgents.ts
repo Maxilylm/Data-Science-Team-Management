@@ -30,12 +30,20 @@ export function useAgents() {
       api.sendInput(agentId, input)
   })
 
+  const createMutation = useMutation({
+    mutationFn: api.createAgent,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agents'] })
+    }
+  })
+
   return {
     agents,
     isLoading,
     error,
     spawnAgent: spawnMutation.mutate,
     stopAgent: stopMutation.mutate,
-    sendInput: sendInputMutation.mutate
+    sendInput: sendInputMutation.mutate,
+    createAgent: createMutation.mutate
   }
 }
