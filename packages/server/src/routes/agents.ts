@@ -71,7 +71,8 @@ export function createAgentsRouter(
         prompt,
         projectPath,
         model: agent.model,
-        resumeSessionId
+        resumeSessionId,
+        allowedTools: agent.tools
       })
 
       agentService.updateAgentStatus(agent.id, 'running', sessionId)

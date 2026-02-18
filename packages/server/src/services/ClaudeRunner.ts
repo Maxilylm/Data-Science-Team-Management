@@ -64,9 +64,7 @@ export class ClaudeRunner extends EventEmitter {
 
     // Allow specific tools without prompting (for automated runs)
     if (options.allowedTools && options.allowedTools.length > 0) {
-      for (const tool of options.allowedTools) {
-        args.push('--allowedTools', tool)
-      }
+      args.push('--allowedTools', options.allowedTools.join(','))
     }
 
     // Use -p for the prompt (runs in non-interactive mode)
