@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import type { Agent, AgentConfig } from '../types/Agent'
+import type { Agent, AgentConfig, AgentInstance } from '../types/Agent'
 
 export class AgentService {
   private agents: Map<string, Agent> = new Map()
@@ -34,6 +34,7 @@ ${systemPrompt}
       color: config.color || 'blue',
       status: 'idle',
       sessionId: null,
+      instances: [],
       configPath: filePath,
       tools: config.tools
     }
@@ -64,6 +65,7 @@ ${systemPrompt}
             color: config.color || 'gray',
             status: 'idle',
             sessionId: null,
+            instances: [],
             configPath: filePath,
             tools: config.tools
           }
@@ -143,7 +145,52 @@ ${systemPrompt}
       }
       agent.status = status
       if (sessionId !== undefined) agent.sessionId = sessionId
+
+      // Update overall status based on instances
+      if (agent.instances.length > 0) {
+        agent.status = 'running'
+      }
     }
+  }
+
+  addInstance(agentId: string, instance: AgentInstance): void {
+    const agent = this.agents.get(agentId)
+    if (agent) {
+      agent.instances.push(instance)
+      agent.status = 'running'
+      agent.sessionId = instance.sessionId
+    }
+  }
+
+  removeInstance(agentId: string, instanceId: string): void {
+    const agent = this.agents.get(agentId)
+    if (agent) {
+      const instance = agent.instances.find(i => i.instanceId === instanceId)
+      if (instance) {
+        agent.lastSessionId = instance.sessionId
+      }
+      agent.instances = agent.instances.filter(i => i.instanceId !== instanceId)
+      if (agent.instances.length === 0) {
+        agent.status = 'idle'
+        agent.sessionId = null
+      } else {
+        agent.sessionId = agent.instances[0].sessionId
+      }
+    }
+  }
+
+  getInstance(agentId: string, instanceId: string): AgentInstance | undefined {
+    return this.agents.get(agentId)?.instances.find(i => i.instanceId === instanceId)
+  }
+
+  getInstanceBySession(sessionId: string): { agent: Agent; instance: AgentInstance } | undefined {
+    for (const agent of this.agents.values()) {
+      const instance = agent.instances.find(i => i.sessionId === sessionId)
+      if (instance) {
+        return { agent, instance }
+      }
+    }
+    return undefined
   }
 
   getLastSessionId(id: string): string | undefined {

@@ -56,7 +56,7 @@ export function createAgentsRouter(
       return
     }
 
-    const { prompt, projectPath, resume } = req.body
+    const { prompt, projectPath, resume, parentInstanceId } = req.body
     if (!prompt) {
       res.status(400).json({ error: 'Prompt is required' })
       return
@@ -75,9 +75,18 @@ export function createAgentsRouter(
         allowedTools: agent.tools
       })
 
-      agentService.updateAgentStatus(agent.id, 'running', sessionId)
+      // Create instance for tracking
+      const instanceId = `inst-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
+      agentService.addInstance(agent.id, {
+        instanceId,
+        sessionId,
+        status: 'running',
+        startedAt: new Date(),
+        prompt: prompt.slice(0, 200),
+        parentInstanceId
+      })
 
-      res.json({ sessionId, agentId: agent.id, resumed: !!resumeSessionId })
+      res.json({ sessionId, instanceId, agentId: agent.id, resumed: !!resumeSessionId })
     } catch {
       res.status(500).json({ error: 'Failed to spawn agent' })
     }

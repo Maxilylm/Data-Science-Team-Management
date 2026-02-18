@@ -47,11 +47,10 @@ async function main() {
 
   claudeRunner.on('close', (event) => {
     console.log(`[${event.agentId}] closed with code:`, event.code)
-    const agents = agentService.getAllAgents()
-    const agent = agents.find(a => a.sessionId === event.sessionId)
-    if (agent) {
-      // Pass null to preserve lastSessionId for resuming
-      agentService.updateAgentStatus(agent.id, 'idle', null)
+    // Find and remove the instance by session ID
+    const result = agentService.getInstanceBySession(event.sessionId)
+    if (result) {
+      agentService.removeInstance(result.agent.id, result.instance.instanceId)
     }
   })
 

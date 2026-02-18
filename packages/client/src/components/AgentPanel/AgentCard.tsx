@@ -36,7 +36,8 @@ const statusColors: Record<string, string> = {
 }
 
 export default function AgentCard({ agent, onSpawn, onStop, onDelete }: AgentCardProps) {
-  const isRunning = agent.status === 'running' || agent.status === 'waiting_input'
+  const instanceCount = agent.instances?.length || 0
+  const isRunning = instanceCount > 0
 
   return (
     <div style={cardStyle}>
@@ -48,6 +49,18 @@ export default function AgentCard({ agent, onSpawn, onStop, onDelete }: AgentCar
           backgroundColor: agent.color
         }} />
         <span style={{ fontWeight: 600 }}>{agent.name}</span>
+        {instanceCount > 0 && (
+          <span style={{
+            backgroundColor: '#10b981',
+            color: 'white',
+            fontSize: '11px',
+            padding: '2px 6px',
+            borderRadius: '10px',
+            marginLeft: '4px'
+          }}>
+            {instanceCount} running
+          </span>
+        )}
         <span style={{
           marginLeft: 'auto',
           width: '8px',
@@ -79,23 +92,48 @@ export default function AgentCard({ agent, onSpawn, onStop, onDelete }: AgentCar
       <div style={{ fontSize: '13px', color: '#666', marginBottom: '12px' }}>
         {agent.description.slice(0, 100)}...
       </div>
-      <div style={{ display: 'flex', gap: '8px' }}>
-        {!isRunning ? (
-          <button
-            onClick={onSpawn}
-            style={{
-              padding: '6px 12px',
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              border: 'none',
+
+      {/* Show running instances */}
+      {agent.instances && agent.instances.length > 0 && (
+        <div style={{ marginBottom: '12px' }}>
+          {agent.instances.map(instance => (
+            <div key={instance.instanceId} style={{
+              fontSize: '12px',
+              backgroundColor: '#f0fdf4',
+              padding: '6px 8px',
               borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '13px'
-            }}
-          >
-            Spawn
-          </button>
-        ) : (
+              marginBottom: '4px',
+              borderLeft: `3px solid ${agent.color}`
+            }}>
+              <div style={{ color: '#166534', fontWeight: 500 }}>
+                {instance.prompt?.slice(0, 60)}...
+              </div>
+              {instance.parentInstanceId && (
+                <div style={{ color: '#15803d', fontSize: '11px' }}>
+                  ↳ spawned by another agent
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <button
+          onClick={onSpawn}
+          style={{
+            padding: '6px 12px',
+            backgroundColor: '#3b82f6',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '13px'
+          }}
+        >
+          {isRunning ? '+ New Instance' : 'Spawn'}
+        </button>
+        {isRunning && (
           <button
             onClick={onStop}
             style={{
@@ -108,7 +146,7 @@ export default function AgentCard({ agent, onSpawn, onStop, onDelete }: AgentCar
               fontSize: '13px'
             }}
           >
-            Stop
+            Stop All
           </button>
         )}
         <span style={{ fontSize: '12px', color: '#666', alignSelf: 'center' }}>

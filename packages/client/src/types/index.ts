@@ -1,6 +1,15 @@
 export type AgentStatus = 'idle' | 'running' | 'waiting_input' | 'error'
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'needs_input'
 
+export interface AgentInstance {
+  instanceId: string
+  sessionId: string
+  status: AgentStatus
+  startedAt: string
+  prompt?: string
+  parentInstanceId?: string
+}
+
 export interface Agent {
   id: string
   name: string
@@ -10,6 +19,7 @@ export interface Agent {
   status: AgentStatus
   sessionId: string | null
   lastSessionId?: string
+  instances: AgentInstance[]
   currentTaskId?: string
 }
 

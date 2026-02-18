@@ -1,6 +1,15 @@
 export type AgentStatus = 'idle' | 'running' | 'waiting_input' | 'error'
 export type ModelType = 'sonnet' | 'opus' | 'haiku'
 
+export interface AgentInstance {
+  instanceId: string
+  sessionId: string
+  status: AgentStatus
+  startedAt: Date
+  prompt?: string
+  parentInstanceId?: string  // If spawned by another agent
+}
+
 export interface Agent {
   id: string
   name: string
@@ -11,6 +20,8 @@ export interface Agent {
   sessionId: string | null
   /** Last session ID for resuming conversations */
   lastSessionId?: string
+  /** Active instances of this agent */
+  instances: AgentInstance[]
   configPath: string
   /** ID of task currently being executed by this agent */
   currentTaskId?: string
