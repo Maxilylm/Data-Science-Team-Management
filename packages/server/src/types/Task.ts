@@ -5,11 +5,16 @@ export interface Task {
   subject: string
   description: string
   status: TaskStatus
+  /** ID of agent executing this task, or null if unassigned */
   agentId: string | null
   sessionId: string
-  activeForm?: string
+  /** Present continuous form displayed while task runs (e.g., "Running tests") */
+  activeFormDisplay?: string
+  /** IDs of tasks that cannot start until this task completes */
   blocks: string[]
+  /** IDs of tasks that must complete before this task can start */
   blockedBy: string[]
+  /** Request for user input; present only when status === 'needs_input' */
   inputRequest?: InputRequest
   createdAt: string
   updatedAt: string

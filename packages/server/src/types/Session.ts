@@ -5,4 +5,6 @@ export interface Session {
   startedAt: string
   lastActivity: string
   taskIds: string[]
+  /** ISO timestamp when session ended; undefined if still active */
+  endedAt?: string
 }
