@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useAgents } from './hooks/useAgents'
 import { useTasks } from './hooks/useTasks'
 import { useSSE } from './hooks/useSSE'
@@ -8,6 +8,7 @@ import { PromptDialog } from './components/PromptDialog'
 import { InputRequired } from './components/InputRequired'
 import { LiveFeed } from './components/LiveFeed'
 import { CreateAgentDialog } from './components/CreateAgentDialog'
+import { api } from './services/api'
 import type { Agent } from './types'
 
 interface FeedEvent {
@@ -43,6 +44,21 @@ export default function App() {
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
   const [feedEvents, setFeedEvents] = useState<FeedEvent[]>([])
   const [showCreateDialog, setShowCreateDialog] = useState(false)
+  const [projectConfig, setProjectConfig] = useState<{ projectPath: string; projectName: string } | null>(null)
+  const [showConfigEdit, setShowConfigEdit] = useState(false)
+  const [editPath, setEditPath] = useState('')
+
+  useEffect(() => {
+    api.getConfig().then(setProjectConfig)
+  }, [])
+
+  const handleUpdateConfig = async () => {
+    if (editPath) {
+      const updated = await api.updateConfig({ projectPath: editPath })
+      setProjectConfig(updated)
+      setShowConfigEdit(false)
+    }
+  }
 
   const handleSSEMessage = useCallback((event: any) => {
     setFeedEvents(prev => [...prev, {
@@ -104,9 +120,38 @@ export default function App() {
 
       <div style={mainStyle}>
         <header style={headerStyle}>
-          <h1 style={{ fontSize: '24px', fontWeight: 700 }}>
-            Agent Team Dashboard
-          </h1>
+          <div>
+            <h1 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '4px' }}>
+              {projectConfig?.projectName || 'Agent Team Dashboard'}
+            </h1>
+            {!showConfigEdit ? (
+              <div
+                onClick={() => { setEditPath(projectConfig?.projectPath || ''); setShowConfigEdit(true); }}
+                style={{ fontSize: '12px', color: '#666', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                title="Click to change project path"
+              >
+                📁 {projectConfig?.projectPath || 'No project configured'}
+                <span style={{ fontSize: '10px', color: '#999' }}>(click to edit)</span>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <input
+                  type="text"
+                  value={editPath}
+                  onChange={(e) => setEditPath(e.target.value)}
+                  style={{ padding: '4px 8px', fontSize: '12px', width: '400px', border: '1px solid #ddd', borderRadius: '4px' }}
+                  placeholder="/path/to/your/project"
+                  autoFocus
+                />
+                <button onClick={handleUpdateConfig} style={{ padding: '4px 8px', fontSize: '12px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                  Save
+                </button>
+                <button onClick={() => setShowConfigEdit(false)} style={{ padding: '4px 8px', fontSize: '12px', backgroundColor: '#f3f4f6', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <span style={{ fontSize: '14px', color: '#666' }}>
               {agents.filter(a => a.status === 'running').length} active agents

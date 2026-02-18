@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express'
 import type { AgentService } from '../services/AgentService'
 import type { ClaudeRunner } from '../services/ClaudeRunner'
+import { getConfig } from '../config'
 
 export function createAgentsRouter(
   agentService: AgentService,
@@ -65,11 +66,14 @@ export function createAgentsRouter(
     try {
       // If resume is requested and agent has a previous session, resume it
       const resumeSessionId = resume ? agent.lastSessionId : undefined
+      // Use provided projectPath or fall back to config
+      const config = getConfig()
+      const workingPath = projectPath || config.projectPath
 
       const sessionId = await claudeRunner.spawn({
         agentId: agent.id,
         prompt,
-        projectPath,
+        projectPath: workingPath,
         model: agent.model,
         resumeSessionId,
         allowedTools: agent.tools

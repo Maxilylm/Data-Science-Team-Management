@@ -82,5 +82,18 @@ export const api = {
 
   getTaskStats(): Promise<{ pending: number; inProgress: number; completed: number; needsInput: number }> {
     return fetchJson(`${BASE_URL}/tasks/stats`)
+  },
+
+  // Config
+  getConfig(): Promise<{ projectPath: string; projectName: string }> {
+    return fetchJson(`${BASE_URL}/config`)
+  },
+
+  updateConfig(config: { projectPath?: string; projectName?: string }): Promise<{ projectPath: string; projectName: string }> {
+    return fetchJson(`${BASE_URL}/config`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    })
   }
 }

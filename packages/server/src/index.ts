@@ -8,6 +8,8 @@ import { ClaudeRunner } from './services/ClaudeRunner'
 import { createAgentsRouter } from './routes/agents'
 import { createTasksRouter } from './routes/tasks'
 import { createEventsRouter } from './routes/events'
+import { createConfigRouter } from './routes/config'
+import { getConfig } from './config'
 
 const PORT = process.env.PORT || 3456
 
@@ -61,6 +63,7 @@ async function main() {
   app.use('/api/agents', createAgentsRouter(agentService, claudeRunner))
   app.use('/api/tasks', createTasksRouter(taskService))
   app.use('/api/events', createEventsRouter(fileWatcher, claudeRunner))
+  app.use('/api/config', createConfigRouter())
 
   // Health check
   app.get('/health', (_req, res) => {
@@ -79,9 +82,11 @@ async function main() {
     })
   }
 
+  const config = getConfig()
   app.listen(PORT, () => {
     console.log(`Agent Team Dashboard server running on http://localhost:${PORT}`)
-    console.log(`Watching for tasks in ~/.claude/tasks/`)
+    console.log(`Project: ${config.projectName}`)
+    console.log(`Working directory: ${config.projectPath}`)
     console.log(`Loaded ${agentService.getAllAgents().length} agents from .claude/agents/`)
   })
 }
