@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { FileWatcher } from '../FileWatcher'
+import { FileWatcher, type TaskChangeEvent } from '../FileWatcher'
 import * as fs from 'fs/promises'
 import * as path from 'path'
 import * as os from 'os'
@@ -20,7 +20,7 @@ describe('FileWatcher', () => {
   })
 
   it('should emit event when task file is created', async () => {
-    const events: any[] = []
+    const events: TaskChangeEvent[] = []
     watcher.on('taskChange', (event) => events.push(event))
 
     await watcher.start()
@@ -39,6 +39,24 @@ describe('FileWatcher', () => {
 
     expect(events.length).toBeGreaterThan(0)
     expect(events[0].sessionId).toBe('session-123')
-    expect(events[0].task.subject).toBe('Test Task')
+    expect(events[0].task?.subject).toBe('Test Task')
+  })
+
+  it('should emit parseError for malformed JSON', async () => {
+    const errors: any[] = []
+    watcher.on('parseError', (event) => errors.push(event))
+
+    await watcher.start()
+
+    const sessionDir = path.join(testDir, 'session-456')
+    await fs.mkdir(sessionDir, { recursive: true })
+
+    const taskFile = path.join(sessionDir, '2.json')
+    await fs.writeFile(taskFile, 'not valid json')
+
+    await new Promise(r => setTimeout(r, 200))
+
+    expect(errors.length).toBeGreaterThan(0)
+    expect(errors[0].filePath).toContain('2.json')
   })
 })
