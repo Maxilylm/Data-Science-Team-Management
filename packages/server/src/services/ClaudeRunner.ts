@@ -7,6 +7,7 @@ export interface ClaudeRunnerOptions {
   projectPath?: string
   model?: 'sonnet' | 'opus' | 'haiku'
   allowedTools?: string[]  // Tools to auto-allow
+  resumeSessionId?: string  // Resume an existing session
   onOutput?: (data: string) => void
   onError?: (data: string) => void
 }
@@ -46,20 +47,20 @@ export class ClaudeRunner extends EventEmitter {
   }
 
   async spawn(options: ClaudeRunnerOptions): Promise<string> {
-    const sessionId = `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+    const sessionId = options.resumeSessionId || `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 
     const args: string[] = []
 
-    if (options.agentId) {
+    // Resume existing session or start new one with agent
+    if (options.resumeSessionId) {
+      args.push('--resume', options.resumeSessionId)
+    } else if (options.agentId) {
       args.push('--agent', options.agentId)
     }
 
     if (options.model) {
       args.push('--model', options.model)
     }
-
-    // Note: --cwd is not a valid claude CLI option
-    // We set the working directory via spawn's cwd option instead
 
     // Allow specific tools without prompting (for automated runs)
     if (options.allowedTools && options.allowedTools.length > 0) {

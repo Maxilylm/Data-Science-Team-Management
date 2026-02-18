@@ -10,6 +10,12 @@ export function useSSE(url: string, options: UseSSEOptions = {}) {
   const [isConnected, setIsConnected] = useState(false)
   const [lastEvent, setLastEvent] = useState<any>(null)
   const eventSourceRef = useRef<EventSource | null>(null)
+  const optionsRef = useRef(options)
+
+  // Keep options ref up to date without triggering reconnection
+  useEffect(() => {
+    optionsRef.current = options
+  }, [options])
 
   const connect = useCallback(() => {
     if (eventSourceRef.current) {
@@ -21,14 +27,14 @@ export function useSSE(url: string, options: UseSSEOptions = {}) {
 
     es.addEventListener('open', () => {
       setIsConnected(true)
-      options.onOpen?.()
+      optionsRef.current.onOpen?.()
     })
 
     es.addEventListener('message', (event) => {
       try {
         const data = JSON.parse(event.data)
         setLastEvent(data)
-        options.onMessage?.(data)
+        optionsRef.current.onMessage?.(data)
       } catch {
         // Ignore parse errors
       }
@@ -36,9 +42,9 @@ export function useSSE(url: string, options: UseSSEOptions = {}) {
 
     es.addEventListener('error', (event) => {
       setIsConnected(false)
-      options.onError?.(event)
+      optionsRef.current.onError?.(event)
     })
-  }, [url, options])
+  }, [url])  // Only reconnect when URL changes
 
   useEffect(() => {
     connect()

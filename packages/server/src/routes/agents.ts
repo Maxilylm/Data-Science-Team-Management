@@ -56,23 +56,27 @@ export function createAgentsRouter(
       return
     }
 
-    const { prompt, projectPath } = req.body
+    const { prompt, projectPath, resume } = req.body
     if (!prompt) {
       res.status(400).json({ error: 'Prompt is required' })
       return
     }
 
     try {
+      // If resume is requested and agent has a previous session, resume it
+      const resumeSessionId = resume ? agent.lastSessionId : undefined
+
       const sessionId = await claudeRunner.spawn({
         agentId: agent.id,
         prompt,
         projectPath,
-        model: agent.model
+        model: agent.model,
+        resumeSessionId
       })
 
       agentService.updateAgentStatus(agent.id, 'running', sessionId)
 
-      res.json({ sessionId, agentId: agent.id })
+      res.json({ sessionId, agentId: agent.id, resumed: !!resumeSessionId })
     } catch {
       res.status(500).json({ error: 'Failed to spawn agent' })
     }

@@ -61,8 +61,8 @@ export default function App() {
     if (agent) setSelectedAgent(agent)
   }
 
-  const handleSubmitPrompt = (agentId: string, prompt: string) => {
-    spawnAgent({ agentId, prompt })
+  const handleSubmitPrompt = (agentId: string, prompt: string, resume?: boolean) => {
+    spawnAgent({ agentId, prompt, resume })
     setSelectedAgent(null)
   }
 

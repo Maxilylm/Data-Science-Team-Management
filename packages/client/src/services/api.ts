@@ -35,11 +35,11 @@ export const api = {
     })
   },
 
-  spawnAgent(agentId: string, prompt: string, projectPath?: string): Promise<{ sessionId: string }> {
+  spawnAgent(agentId: string, prompt: string, options?: { projectPath?: string; resume?: boolean }): Promise<{ sessionId: string; resumed?: boolean }> {
     return fetchJson(`${BASE_URL}/agents/${agentId}/spawn`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt, projectPath })
+      body: JSON.stringify({ prompt, projectPath: options?.projectPath, resume: options?.resume })
     })
   },
 

@@ -11,8 +11,8 @@ export function useAgents() {
   })
 
   const spawnMutation = useMutation({
-    mutationFn: ({ agentId, prompt }: { agentId: string; prompt: string }) =>
-      api.spawnAgent(agentId, prompt),
+    mutationFn: ({ agentId, prompt, resume }: { agentId: string; prompt: string; resume?: boolean }) =>
+      api.spawnAgent(agentId, prompt, { resume }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agents'] })
     }

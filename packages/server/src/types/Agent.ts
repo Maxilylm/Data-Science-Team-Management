@@ -9,6 +9,8 @@ export interface Agent {
   color: string
   status: AgentStatus
   sessionId: string | null
+  /** Last session ID for resuming conversations */
+  lastSessionId?: string
   configPath: string
   /** ID of task currently being executed by this agent */
   currentTaskId?: string

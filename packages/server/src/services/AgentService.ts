@@ -134,12 +134,20 @@ ${systemPrompt}
     return Array.from(this.agents.values())
   }
 
-  updateAgentStatus(id: string, status: Agent['status'], sessionId?: string): void {
+  updateAgentStatus(id: string, status: Agent['status'], sessionId?: string | null): void {
     const agent = this.agents.get(id)
     if (agent) {
+      // Save current sessionId as lastSessionId before clearing
+      if (agent.sessionId && sessionId === null) {
+        agent.lastSessionId = agent.sessionId
+      }
       agent.status = status
       if (sessionId !== undefined) agent.sessionId = sessionId
     }
+  }
+
+  getLastSessionId(id: string): string | undefined {
+    return this.agents.get(id)?.lastSessionId
   }
 
   async deleteAgent(id: string): Promise<boolean> {

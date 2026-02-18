@@ -3,7 +3,7 @@ import type { Agent } from '../../types'
 
 interface PromptDialogProps {
   agent: Agent | null
-  onSubmit: (agentId: string, prompt: string) => void
+  onSubmit: (agentId: string, prompt: string, resume?: boolean) => void
   onClose: () => void
 }
 
@@ -50,9 +50,11 @@ export default function PromptDialog({ agent, onSubmit, onClose }: PromptDialogP
 
   if (!agent) return null
 
-  const handleSubmit = () => {
+  const canResume = !!agent.lastSessionId
+
+  const handleSubmit = (resume: boolean = false) => {
     if (prompt.trim()) {
-      onSubmit(agent.id, prompt)
+      onSubmit(agent.id, prompt, resume)
       setPrompt('')
     }
   }
@@ -76,6 +78,20 @@ export default function PromptDialog({ agent, onSubmit, onClose }: PromptDialogP
           {agent.description.slice(0, 200)}
         </p>
 
+        {canResume && (
+          <div style={{
+            backgroundColor: '#f0fdf4',
+            border: '1px solid #86efac',
+            borderRadius: '6px',
+            padding: '8px 12px',
+            marginBottom: '12px',
+            fontSize: '13px',
+            color: '#166534'
+          }}>
+            This agent has a previous session that can be resumed.
+          </div>
+        )}
+
         <textarea
           style={textareaStyle}
           placeholder="Describe the task for this agent..."
@@ -97,8 +113,24 @@ export default function PromptDialog({ agent, onSubmit, onClose }: PromptDialogP
           >
             Cancel
           </button>
+          {canResume && (
+            <button
+              onClick={() => handleSubmit(true)}
+              disabled={!prompt.trim()}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: prompt.trim() ? '#10b981' : '#9ca3af',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: prompt.trim() ? 'pointer' : 'not-allowed'
+              }}
+            >
+              Resume Session
+            </button>
+          )}
           <button
-            onClick={handleSubmit}
+            onClick={() => handleSubmit(false)}
             disabled={!prompt.trim()}
             style={{
               padding: '8px 16px',
@@ -109,7 +141,7 @@ export default function PromptDialog({ agent, onSubmit, onClose }: PromptDialogP
               cursor: prompt.trim() ? 'pointer' : 'not-allowed'
             }}
           >
-            Start Task
+            {canResume ? 'New Session' : 'Start Task'}
           </button>
         </div>
       </div>

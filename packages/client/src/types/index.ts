@@ -9,6 +9,7 @@ export interface Agent {
   color: string
   status: AgentStatus
   sessionId: string | null
+  lastSessionId?: string
   currentTaskId?: string
 }
 

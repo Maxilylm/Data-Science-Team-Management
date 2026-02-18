@@ -50,7 +50,8 @@ async function main() {
     const agents = agentService.getAllAgents()
     const agent = agents.find(a => a.sessionId === event.sessionId)
     if (agent) {
-      agentService.updateAgentStatus(agent.id, 'idle', undefined)
+      // Pass null to preserve lastSessionId for resuming
+      agentService.updateAgentStatus(agent.id, 'idle', null)
     }
   })
 
