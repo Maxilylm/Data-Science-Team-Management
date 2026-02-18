@@ -63,8 +63,11 @@ export default function InputRequired({ tasks, onSubmitInput }: InputRequiredPro
                         backgroundColor: '#f3f4f6',
                         border: '1px solid #d1d5db',
                         borderRadius: '4px',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        transition: 'background-color 0.2s'
                       }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e5e7eb'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
                     >
                       {option}
                     </button>
@@ -93,8 +96,11 @@ export default function InputRequired({ tasks, onSubmitInput }: InputRequiredPro
                       color: 'white',
                       border: 'none',
                       borderRadius: '4px',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      transition: 'background-color 0.2s'
                     }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3b82f6'}
                   >
                     Send
                   </button>

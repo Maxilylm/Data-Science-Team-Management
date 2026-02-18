@@ -73,3 +73,16 @@ Reject PRs that:
 - Are incomplete or WIP
 
 Always provide clear feedback on what needs to be fixed.
+
+## Completing Work
+
+**CRITICAL: Every review MUST end with a concrete action:**
+
+1. **If PR is good**: Approve and merge it with `gh pr merge --squash --delete-branch`
+2. **If changes needed**: Request changes with `gh pr review --request-changes -b "..."`
+3. **If blocked**: Explain what's blocking and what needs to happen
+
+After merging, output a clear message like:
+```
+PR #123 merged successfully. Ticket work is complete.
+```

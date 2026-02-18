@@ -1,5 +1,26 @@
 export type AgentStatus = 'idle' | 'running' | 'waiting_input' | 'error'
 export type ModelType = 'sonnet' | 'opus' | 'haiku'
+export type TicketStatus = 'unassigned' | 'pending' | 'in_progress' | 'needs_help' | 'completed'
+export type TicketPriority = 'low' | 'medium' | 'high' | 'urgent'
+
+export interface Ticket {
+  id: string
+  title: string
+  description: string
+  status: TicketStatus
+  priority: TicketPriority
+  assignedTo: string | null  // Agent ID or null if unassigned
+  createdBy: string  // 'user' or agent ID
+  createdAt: Date
+  updatedAt: Date
+  helpRequest?: {
+    fromAgent: string
+    message: string
+    targetAgent?: string  // Specific agent or undefined for any/user
+  }
+  parentTicketId?: string  // If this is a sub-task
+  tags: string[]
+}
 
 export interface AgentInstance {
   instanceId: string
@@ -8,6 +29,7 @@ export interface AgentInstance {
   startedAt: Date
   prompt?: string
   parentInstanceId?: string  // If spawned by another agent
+  ticketId?: string  // Ticket being worked on
 }
 
 export interface Agent {

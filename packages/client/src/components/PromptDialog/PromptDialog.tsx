@@ -5,6 +5,7 @@ interface PromptDialogProps {
   agent: Agent | null
   onSubmit: (agentId: string, prompt: string, resume?: boolean) => void
   onClose: () => void
+  isDarkMode?: boolean
 }
 
 const overlayStyle: React.CSSProperties = {
@@ -20,24 +21,27 @@ const overlayStyle: React.CSSProperties = {
   zIndex: 1000
 }
 
-const dialogStyle: React.CSSProperties = {
-  backgroundColor: 'white',
+const getDialogStyle = (isDark: boolean): React.CSSProperties => ({
+  backgroundColor: isDark ? '#1f2937' : 'white',
   borderRadius: '12px',
   padding: '24px',
   width: '500px',
-  maxWidth: '90vw'
-}
+  maxWidth: '90vw',
+  color: isDark ? '#e5e7eb' : 'inherit'
+})
 
-const textareaStyle: React.CSSProperties = {
+const getTextareaStyle = (isDark: boolean): React.CSSProperties => ({
   width: '100%',
   minHeight: '120px',
   padding: '12px',
-  border: '1px solid #d1d5db',
+  border: isDark ? '1px solid #4b5563' : '1px solid #d1d5db',
   borderRadius: '6px',
   fontSize: '14px',
   resize: 'vertical',
-  marginBottom: '16px'
-}
+  marginBottom: '16px',
+  backgroundColor: isDark ? '#374151' : 'white',
+  color: isDark ? '#e5e7eb' : 'inherit'
+})
 
 const buttonRowStyle: React.CSSProperties = {
   display: 'flex',
@@ -45,7 +49,7 @@ const buttonRowStyle: React.CSSProperties = {
   gap: '8px'
 }
 
-export default function PromptDialog({ agent, onSubmit, onClose }: PromptDialogProps) {
+export default function PromptDialog({ agent, onSubmit, onClose, isDarkMode = false }: PromptDialogProps) {
   const [prompt, setPrompt] = useState('')
 
   if (!agent) return null
@@ -61,7 +65,7 @@ export default function PromptDialog({ agent, onSubmit, onClose }: PromptDialogP
 
   return (
     <div style={overlayStyle} onClick={onClose}>
-      <div style={dialogStyle} onClick={e => e.stopPropagation()}>
+      <div style={getDialogStyle(isDarkMode)} onClick={e => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
           <span style={{
             width: '12px',
@@ -74,26 +78,26 @@ export default function PromptDialog({ agent, onSubmit, onClose }: PromptDialogP
           </h2>
         </div>
 
-        <p style={{ fontSize: '14px', color: '#666', marginBottom: '12px' }}>
+        <p style={{ fontSize: '14px', color: isDarkMode ? '#9ca3af' : '#666', marginBottom: '12px' }}>
           {agent.description.slice(0, 200)}
         </p>
 
         {canResume && (
           <div style={{
-            backgroundColor: '#f0fdf4',
-            border: '1px solid #86efac',
+            backgroundColor: isDarkMode ? '#065f46' : '#f0fdf4',
+            border: isDarkMode ? '1px solid #10b981' : '1px solid #86efac',
             borderRadius: '6px',
             padding: '8px 12px',
             marginBottom: '12px',
             fontSize: '13px',
-            color: '#166534'
+            color: isDarkMode ? '#6ee7b7' : '#166534'
           }}>
             This agent has a previous session that can be resumed.
           </div>
         )}
 
         <textarea
-          style={textareaStyle}
+          style={getTextareaStyle(isDarkMode)}
           placeholder="Describe the task for this agent..."
           value={prompt}
           onChange={e => setPrompt(e.target.value)}
@@ -105,10 +109,22 @@ export default function PromptDialog({ agent, onSubmit, onClose }: PromptDialogP
             onClick={onClose}
             style={{
               padding: '8px 16px',
-              backgroundColor: '#f3f4f6',
+              backgroundColor: isDarkMode ? '#4b5563' : '#f3f4f6',
               border: 'none',
               borderRadius: '6px',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              color: isDarkMode ? '#e5e7eb' : 'inherit'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = isDarkMode ? '#6b7280' : '#e5e7eb';
+              e.currentTarget.style.transform = 'scale(1.02)';
+              e.currentTarget.style.boxShadow = isDarkMode ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.15)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = isDarkMode ? '#4b5563' : '#f3f4f6';
+              e.currentTarget.style.transform = 'scale(1)';
+              e.currentTarget.style.boxShadow = 'none';
             }}
           >
             Cancel
@@ -123,7 +139,22 @@ export default function PromptDialog({ agent, onSubmit, onClose }: PromptDialogP
                 color: 'white',
                 border: 'none',
                 borderRadius: '6px',
-                cursor: prompt.trim() ? 'pointer' : 'not-allowed'
+                cursor: prompt.trim() ? 'pointer' : 'not-allowed',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                if (prompt.trim()) {
+                  e.currentTarget.style.backgroundColor = '#059669';
+                  e.currentTarget.style.transform = 'scale(1.02)';
+                  e.currentTarget.style.boxShadow = isDarkMode ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.15)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (prompt.trim()) {
+                  e.currentTarget.style.backgroundColor = '#10b981';
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }
               }}
             >
               Resume Session
@@ -138,7 +169,22 @@ export default function PromptDialog({ agent, onSubmit, onClose }: PromptDialogP
               color: 'white',
               border: 'none',
               borderRadius: '6px',
-              cursor: prompt.trim() ? 'pointer' : 'not-allowed'
+              cursor: prompt.trim() ? 'pointer' : 'not-allowed',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              if (prompt.trim()) {
+                e.currentTarget.style.backgroundColor = '#2563eb';
+                e.currentTarget.style.transform = 'scale(1.02)';
+                e.currentTarget.style.boxShadow = isDarkMode ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.15)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (prompt.trim()) {
+                e.currentTarget.style.backgroundColor = '#3b82f6';
+                e.currentTarget.style.transform = 'scale(1)';
+                e.currentTarget.style.boxShadow = 'none';
+              }
             }}
           >
             {canResume ? 'New Session' : 'Start Task'}

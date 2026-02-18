@@ -11,6 +11,7 @@ interface CreateAgentDialogProps {
     systemPrompt?: string
   }) => void
   onClose: () => void
+  isDarkMode?: boolean
 }
 
 const overlayStyle: React.CSSProperties = {
@@ -26,43 +27,46 @@ const overlayStyle: React.CSSProperties = {
   zIndex: 1000
 }
 
-const dialogStyle: React.CSSProperties = {
-  backgroundColor: 'white',
+const getDialogStyle = (isDark: boolean): React.CSSProperties => ({
+  backgroundColor: isDark ? '#1f2937' : 'white',
   borderRadius: '12px',
   padding: '24px',
   width: '600px',
   maxWidth: '90vw',
   maxHeight: '90vh',
-  overflowY: 'auto'
-}
+  overflowY: 'auto',
+  color: isDark ? '#e5e7eb' : 'inherit'
+})
 
-const inputStyle: React.CSSProperties = {
+const getInputStyle = (isDark: boolean): React.CSSProperties => ({
   width: '100%',
   padding: '10px 12px',
-  border: '1px solid #d1d5db',
+  border: isDark ? '1px solid #4b5563' : '1px solid #d1d5db',
   borderRadius: '6px',
   fontSize: '14px',
-  marginBottom: '12px'
-}
+  marginBottom: '12px',
+  backgroundColor: isDark ? '#374151' : 'white',
+  color: isDark ? '#e5e7eb' : 'inherit'
+})
 
-const labelStyle: React.CSSProperties = {
+const getLabelStyle = (isDark: boolean): React.CSSProperties => ({
   display: 'block',
   fontSize: '14px',
   fontWeight: 500,
   marginBottom: '4px',
-  color: '#374151'
-}
+  color: isDark ? '#d1d5db' : '#374151'
+})
 
-const textareaStyle: React.CSSProperties = {
-  ...inputStyle,
+const getTextareaStyle = (isDark: boolean): React.CSSProperties => ({
+  ...getInputStyle(isDark),
   minHeight: '100px',
   resize: 'vertical'
-}
+})
 
 const colors = ['blue', 'green', 'purple', 'orange', 'red', 'pink', 'cyan', 'yellow']
 const models = ['sonnet', 'opus', 'haiku']
 
-export default function CreateAgentDialog({ isOpen, onSubmit, onClose }: CreateAgentDialogProps) {
+export default function CreateAgentDialog({ isOpen, onSubmit, onClose, isDarkMode = false }: CreateAgentDialogProps) {
   const [id, setId] = useState('')
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
@@ -96,30 +100,30 @@ export default function CreateAgentDialog({ isOpen, onSubmit, onClose }: CreateA
 
   return (
     <div style={overlayStyle} onClick={onClose}>
-      <div style={dialogStyle} onClick={e => e.stopPropagation()}>
+      <div style={getDialogStyle(isDarkMode)} onClick={e => e.stopPropagation()}>
         <h2 style={{ fontSize: '20px', fontWeight: 600, marginBottom: '20px' }}>
           Create New Agent
         </h2>
 
-        <label style={labelStyle}>Agent ID</label>
+        <label style={getLabelStyle(isDarkMode)}>Agent ID</label>
         <input
-          style={inputStyle}
+          style={getInputStyle(isDarkMode)}
           placeholder="e.g., data-analyst"
           value={id}
           onChange={e => setId(e.target.value)}
         />
 
-        <label style={labelStyle}>Name</label>
+        <label style={getLabelStyle(isDarkMode)}>Name</label>
         <input
-          style={inputStyle}
+          style={getInputStyle(isDarkMode)}
           placeholder="e.g., Data Analyst"
           value={name}
           onChange={e => setName(e.target.value)}
         />
 
-        <label style={labelStyle}>Description</label>
+        <label style={getLabelStyle(isDarkMode)}>Description</label>
         <input
-          style={inputStyle}
+          style={getInputStyle(isDarkMode)}
           placeholder="Brief description of what this agent does"
           value={description}
           onChange={e => setDescription(e.target.value)}
@@ -127,9 +131,9 @@ export default function CreateAgentDialog({ isOpen, onSubmit, onClose }: CreateA
 
         <div style={{ display: 'flex', gap: '16px', marginBottom: '12px' }}>
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Model</label>
+            <label style={getLabelStyle(isDarkMode)}>Model</label>
             <select
-              style={{ ...inputStyle, cursor: 'pointer' }}
+              style={{ ...getInputStyle(isDarkMode), cursor: 'pointer' }}
               value={model}
               onChange={e => setModel(e.target.value)}
             >
@@ -139,9 +143,9 @@ export default function CreateAgentDialog({ isOpen, onSubmit, onClose }: CreateA
             </select>
           </div>
           <div style={{ flex: 1 }}>
-            <label style={labelStyle}>Color</label>
+            <label style={getLabelStyle(isDarkMode)}>Color</label>
             <select
-              style={{ ...inputStyle, cursor: 'pointer' }}
+              style={{ ...getInputStyle(isDarkMode), cursor: 'pointer' }}
               value={color}
               onChange={e => setColor(e.target.value)}
             >
@@ -152,9 +156,9 @@ export default function CreateAgentDialog({ isOpen, onSubmit, onClose }: CreateA
           </div>
         </div>
 
-        <label style={labelStyle}>System Prompt (optional)</label>
+        <label style={getLabelStyle(isDarkMode)}>System Prompt (optional)</label>
         <textarea
-          style={textareaStyle}
+          style={getTextareaStyle(isDarkMode)}
           placeholder="Custom instructions for this agent..."
           value={systemPrompt}
           onChange={e => setSystemPrompt(e.target.value)}
@@ -165,12 +169,16 @@ export default function CreateAgentDialog({ isOpen, onSubmit, onClose }: CreateA
             onClick={onClose}
             style={{
               padding: '10px 20px',
-              backgroundColor: '#f3f4f6',
+              backgroundColor: isDarkMode ? '#4b5563' : '#f3f4f6',
               border: 'none',
               borderRadius: '6px',
               cursor: 'pointer',
-              fontSize: '14px'
+              fontSize: '14px',
+              transition: 'background-color 0.2s',
+              color: isDarkMode ? '#e5e7eb' : 'inherit'
             }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isDarkMode ? '#6b7280' : '#e5e7eb'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isDarkMode ? '#4b5563' : '#f3f4f6'}
           >
             Cancel
           </button>
@@ -184,8 +192,11 @@ export default function CreateAgentDialog({ isOpen, onSubmit, onClose }: CreateA
               border: 'none',
               borderRadius: '6px',
               cursor: isValid ? 'pointer' : 'not-allowed',
-              fontSize: '14px'
+              fontSize: '14px',
+              transition: 'background-color 0.2s'
             }}
+            onMouseEnter={(e) => { if (isValid) e.currentTarget.style.backgroundColor = '#2563eb' }}
+            onMouseLeave={(e) => { if (isValid) e.currentTarget.style.backgroundColor = '#3b82f6' }}
           >
             Create Agent
           </button>

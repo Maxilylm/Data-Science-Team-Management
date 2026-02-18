@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import type { Agent, AgentConfig, AgentInstance } from '../types/Agent'
+import type { Agent, AgentConfig, AgentInstance, AgentStatus } from '../types/Agent'
 
 export class AgentService {
   private agents: Map<string, Agent> = new Map()
@@ -191,6 +191,20 @@ ${systemPrompt}
       }
     }
     return undefined
+  }
+
+  updateInstanceStatus(agentId: string, instanceId: string, status: AgentStatus): void {
+    const agent = this.agents.get(agentId)
+    if (agent) {
+      const instance = agent.instances.find(i => i.instanceId === instanceId)
+      if (instance) {
+        instance.status = status
+        // Update agent status to match the most "active" instance
+        if (status === 'waiting_input') {
+          agent.status = 'waiting_input'
+        }
+      }
+    }
   }
 
   getLastSessionId(id: string): string | undefined {

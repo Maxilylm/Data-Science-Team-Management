@@ -1,4 +1,4 @@
-import type { Agent, Task, KanbanData } from '../types'
+import type { Agent, Task, KanbanData, Ticket, TicketPriority } from '../types'
 
 const BASE_URL = '/api'
 
@@ -94,6 +94,59 @@ export const api = {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(config)
+    })
+  },
+
+  // Tickets
+  getTickets(): Promise<Ticket[]> {
+    return fetchJson(`${BASE_URL}/tickets`)
+  },
+
+  getTicketsByAgent(agentId: string): Promise<Ticket[]> {
+    return fetchJson(`${BASE_URL}/tickets/agent/${agentId}`)
+  },
+
+  getUnassignedTickets(): Promise<Ticket[]> {
+    return fetchJson(`${BASE_URL}/tickets/unassigned`)
+  },
+
+  getTicketsSummary(): Promise<{ total: number; unassigned: number; pending: number; inProgress: number; needsHelp: number; completed: number }> {
+    return fetchJson(`${BASE_URL}/tickets/summary`)
+  },
+
+  createTicket(ticket: { title: string; description: string; assignedTo?: string; priority?: TicketPriority; tags?: string[] }): Promise<Ticket> {
+    return fetchJson(`${BASE_URL}/tickets`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...ticket, createdBy: 'user' })
+    })
+  },
+
+  updateTicket(id: string, updates: Partial<Ticket>): Promise<Ticket> {
+    return fetchJson(`${BASE_URL}/tickets/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updates)
+    })
+  },
+
+  assignTicket(id: string, agentId: string | null): Promise<Ticket> {
+    return fetchJson(`${BASE_URL}/tickets/${id}/assign`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ agentId })
+    })
+  },
+
+  deleteTicket(id: string): Promise<{ success: boolean }> {
+    return fetchJson(`${BASE_URL}/tickets/${id}`, { method: 'DELETE' })
+  },
+
+  answerTicketQuestion(id: string, answer: string): Promise<{ success: boolean; ticket: Ticket }> {
+    return fetchJson(`${BASE_URL}/tickets/${id}/answer`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answer })
     })
   }
 }

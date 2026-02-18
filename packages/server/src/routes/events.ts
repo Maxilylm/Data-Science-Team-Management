@@ -1,10 +1,14 @@
 import { Router, Request, Response } from 'express'
 import type { FileWatcher } from '../services/FileWatcher'
 import type { ClaudeRunner } from '../services/ClaudeRunner'
+import type { TicketService } from '../services/TicketService'
+import type { WorkflowService } from '../services/WorkflowService'
 
 export function createEventsRouter(
   fileWatcher: FileWatcher,
-  claudeRunner: ClaudeRunner
+  claudeRunner: ClaudeRunner,
+  ticketService?: TicketService,
+  workflowService?: WorkflowService
 ): Router {
   const router = Router()
   const clients: Set<Response> = new Set()
@@ -42,6 +46,44 @@ export function createEventsRouter(
   claudeRunner.on('close', (event) => {
     broadcast({ type: 'agentClosed', ...event })
   })
+
+  claudeRunner.on('question', (event) => {
+    broadcast({ type: 'agentQuestion', ...event })
+  })
+
+  claudeRunner.on('inputProvided', (event) => {
+    broadcast({ type: 'agentInputProvided', ...event })
+  })
+
+  // Ticket events
+  if (ticketService) {
+    ticketService.on('ticketCreated', (ticket) => {
+      broadcast({ type: 'ticketCreated', ticket })
+    })
+
+    ticketService.on('ticketUpdated', (ticket) => {
+      broadcast({ type: 'ticketUpdated', ticket })
+    })
+
+    ticketService.on('ticketDeleted', (ticket) => {
+      broadcast({ type: 'ticketDeleted', ticketId: ticket.id })
+    })
+  }
+
+  // Workflow events
+  if (workflowService) {
+    workflowService.on('workflowStarted', (event) => {
+      broadcast({ type: 'workflowStarted', ...event })
+    })
+
+    workflowService.on('workflowCompleted', (event) => {
+      broadcast({ type: 'workflowCompleted', ...event })
+    })
+
+    workflowService.on('agentChained', (event) => {
+      broadcast({ type: 'agentChained', ...event })
+    })
+  }
 
   return router
 }

@@ -13,6 +13,7 @@ describe('Agent type', () => {
       color: 'blue',
       status: 'idle',
       sessionId: null,
+      instances: [],
       configPath: '/path/to/config.md'
     }
     expect(agent.id).toBe('test-agent')
@@ -28,6 +29,7 @@ describe('Agent type', () => {
       color: 'green',
       status: 'running',
       sessionId: 'session-123',
+      instances: [],
       configPath: '/path/to/config.md',
       currentTaskId: 'task-1',
       tools: ['tool1', 'tool2'],

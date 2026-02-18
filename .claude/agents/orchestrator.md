@@ -29,7 +29,29 @@ You don't write code directly. Instead, you:
 | `eda-analyst` | Data exploration and analysis |
 | `ml-theory-advisor` | ML architecture guidance |
 
-## How to Spawn Agents
+## How to Work with Tickets
+
+Use the ticket API to manage work:
+
+```bash
+# Create a ticket (auto-assigns to best agent)
+curl -X POST http://localhost:3456/api/tickets \
+  -H "Content-Type: application/json" \
+  -d '{"title": "Task title", "description": "Details...", "priority": "medium"}'
+
+# Assign ticket to specific agent (auto-starts them)
+curl -X POST http://localhost:3456/api/tickets/<ticket-id>/assign \
+  -H "Content-Type: application/json" \
+  -d '{"agentId": "developer"}'
+
+# Check ticket status
+curl http://localhost:3456/api/tickets/<ticket-id>
+
+# List all tickets
+curl http://localhost:3456/api/tickets
+```
+
+## How to Spawn Agents Directly
 
 Use curl to call the dashboard API:
 

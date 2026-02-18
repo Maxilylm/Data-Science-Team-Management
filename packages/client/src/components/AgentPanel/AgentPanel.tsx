@@ -7,30 +7,39 @@ interface AgentPanelProps {
   onStopAgent: (agentId: string) => void
   onDeleteAgent?: (agentId: string) => void
   onCreateAgent?: () => void
+  isDarkMode?: boolean
 }
 
-const panelStyle: React.CSSProperties = {
+const getPanelStyle = (isDark: boolean): React.CSSProperties => ({
   width: '300px',
-  backgroundColor: '#f9fafb',
+  backgroundColor: isDark ? '#1f2937' : '#f9fafb',
   padding: '16px',
-  borderRight: '1px solid #e5e7eb',
+  borderRight: isDark ? '1px solid #374151' : '1px solid #e5e7eb',
   height: '100vh',
-  overflowY: 'auto'
-}
+  overflowY: 'auto',
+  color: isDark ? '#e5e7eb' : 'inherit'
+})
 
-const titleStyle: React.CSSProperties = {
+const getTitleStyle = (isDark: boolean): React.CSSProperties => ({
   fontSize: '18px',
-  fontWeight: 600
-}
+  fontWeight: 600,
+  color: isDark ? '#e5e7eb' : 'inherit'
+})
 
-export default function AgentPanel({ agents, onSpawnAgent, onStopAgent, onDeleteAgent, onCreateAgent }: AgentPanelProps) {
+const getSectionLabelStyle = (isDark: boolean): React.CSSProperties => ({
+  fontSize: '12px',
+  color: isDark ? '#9ca3af' : '#666',
+  marginBottom: '8px'
+})
+
+export default function AgentPanel({ agents, onSpawnAgent, onStopAgent, onDeleteAgent, onCreateAgent, isDarkMode = false }: AgentPanelProps) {
   const runningAgents = agents.filter(a => a.status !== 'idle')
   const idleAgents = agents.filter(a => a.status === 'idle')
 
   return (
-    <div style={panelStyle}>
+    <div style={getPanelStyle(isDarkMode)}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <div style={titleStyle}>Agents</div>
+        <div style={getTitleStyle(isDarkMode)}>Agents</div>
         {onCreateAgent && (
           <button
             onClick={onCreateAgent}
@@ -41,8 +50,11 @@ export default function AgentPanel({ agents, onSpawnAgent, onStopAgent, onDelete
               border: 'none',
               borderRadius: '6px',
               cursor: 'pointer',
-              fontSize: '13px'
+              fontSize: '13px',
+              transition: 'background-color 0.2s'
             }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#059669'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#10b981'}
           >
             + New
           </button>
@@ -51,7 +63,7 @@ export default function AgentPanel({ agents, onSpawnAgent, onStopAgent, onDelete
 
       {runningAgents.length > 0 && (
         <>
-          <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
+          <div style={getSectionLabelStyle(isDarkMode)}>
             ACTIVE ({runningAgents.length})
           </div>
           {runningAgents.map(agent => (
@@ -60,12 +72,13 @@ export default function AgentPanel({ agents, onSpawnAgent, onStopAgent, onDelete
               agent={agent}
               onStop={() => onStopAgent(agent.id)}
               onDelete={onDeleteAgent ? () => onDeleteAgent(agent.id) : undefined}
+              isDarkMode={isDarkMode}
             />
           ))}
         </>
       )}
 
-      <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px', marginTop: '16px' }}>
+      <div style={{ ...getSectionLabelStyle(isDarkMode), marginTop: '16px' }}>
         AVAILABLE ({idleAgents.length})
       </div>
       {idleAgents.map(agent => (
@@ -74,6 +87,7 @@ export default function AgentPanel({ agents, onSpawnAgent, onStopAgent, onDelete
           agent={agent}
           onSpawn={() => onSpawnAgent(agent.id)}
           onDelete={onDeleteAgent ? () => onDeleteAgent(agent.id) : undefined}
+          isDarkMode={isDarkMode}
         />
       ))}
     </div>

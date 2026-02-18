@@ -1,5 +1,26 @@
 export type AgentStatus = 'idle' | 'running' | 'waiting_input' | 'error'
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'needs_input'
+export type TicketStatus = 'unassigned' | 'pending' | 'in_progress' | 'needs_help' | 'completed'
+export type TicketPriority = 'low' | 'medium' | 'high' | 'urgent'
+
+export interface Ticket {
+  id: string
+  title: string
+  description: string
+  status: TicketStatus
+  priority: TicketPriority
+  assignedTo: string | null
+  createdBy: string
+  createdAt: string
+  updatedAt: string
+  helpRequest?: {
+    fromAgent: string
+    message: string
+    targetAgent?: string
+  }
+  parentTicketId?: string
+  tags: string[]
+}
 
 export interface AgentInstance {
   instanceId: string
@@ -8,6 +29,7 @@ export interface AgentInstance {
   startedAt: string
   prompt?: string
   parentInstanceId?: string
+  ticketId?: string
 }
 
 export interface Agent {
