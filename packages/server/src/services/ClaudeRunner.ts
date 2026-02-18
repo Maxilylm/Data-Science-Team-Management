@@ -6,6 +6,7 @@ export interface ClaudeRunnerOptions {
   prompt: string
   projectPath?: string
   model?: 'sonnet' | 'opus' | 'haiku'
+  allowedTools?: string[]  // Tools to auto-allow
   onOutput?: (data: string) => void
   onError?: (data: string) => void
 }
@@ -35,7 +36,12 @@ export class ClaudeRunner extends EventEmitter {
       args.push('--cwd', options.projectPath)
     }
 
-    args.push('--print')
+    if (options.allowedTools && options.allowedTools.length > 0) {
+      for (const tool of options.allowedTools) {
+        args.push('--allowedTools', tool)
+      }
+    }
+
     args.push('-p', `"${options.prompt.replace(/"/g, '\\"')}"`)
 
     return args.join(' ')
@@ -58,16 +64,24 @@ export class ClaudeRunner extends EventEmitter {
       args.push('--cwd', options.projectPath)
     }
 
-    args.push('--print')
+    // Allow specific tools without prompting (for automated runs)
+    if (options.allowedTools && options.allowedTools.length > 0) {
+      for (const tool of options.allowedTools) {
+        args.push('--allowedTools', tool)
+      }
+    }
+
+    // Use -p for the prompt (runs in non-interactive mode)
     args.push('-p', options.prompt)
 
-    const process = spawn('claude', args, {
+    const childProcess = spawn('claude', args, {
       stdio: ['pipe', 'pipe', 'pipe'],
-      cwd: options.projectPath
+      cwd: options.projectPath || process.cwd(),
+      env: { ...process.env, FORCE_COLOR: '0' }  // Disable colors for cleaner output
     })
 
     const session: RunningSession = {
-      process,
+      process: childProcess,
       agentId: options.agentId,
       sessionId,
       startedAt: new Date()
@@ -75,19 +89,19 @@ export class ClaudeRunner extends EventEmitter {
 
     this.sessions.set(sessionId, session)
 
-    process.stdout?.on('data', (data) => {
+    childProcess.stdout?.on('data', (data) => {
       const output = data.toString()
       options.onOutput?.(output)
       this.emit('output', { sessionId, agentId: options.agentId, data: output })
     })
 
-    process.stderr?.on('data', (data) => {
+    childProcess.stderr?.on('data', (data) => {
       const error = data.toString()
       options.onError?.(error)
       this.emit('error', { sessionId, agentId: options.agentId, data: error })
     })
 
-    process.on('close', (code) => {
+    childProcess.on('close', (code) => {
       this.sessions.delete(sessionId)
       this.emit('close', { sessionId, agentId: options.agentId, code })
     })
