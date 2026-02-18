@@ -5,6 +5,7 @@ interface AgentPanelProps {
   agents: Agent[]
   onSpawnAgent: (agentId: string) => void
   onStopAgent: (agentId: string) => void
+  onDeleteAgent?: (agentId: string) => void
   onCreateAgent?: () => void
 }
 
@@ -22,7 +23,7 @@ const titleStyle: React.CSSProperties = {
   fontWeight: 600
 }
 
-export default function AgentPanel({ agents, onSpawnAgent, onStopAgent, onCreateAgent }: AgentPanelProps) {
+export default function AgentPanel({ agents, onSpawnAgent, onStopAgent, onDeleteAgent, onCreateAgent }: AgentPanelProps) {
   const runningAgents = agents.filter(a => a.status !== 'idle')
   const idleAgents = agents.filter(a => a.status === 'idle')
 
@@ -58,6 +59,7 @@ export default function AgentPanel({ agents, onSpawnAgent, onStopAgent, onCreate
               key={agent.id}
               agent={agent}
               onStop={() => onStopAgent(agent.id)}
+              onDelete={onDeleteAgent ? () => onDeleteAgent(agent.id) : undefined}
             />
           ))}
         </>
@@ -71,6 +73,7 @@ export default function AgentPanel({ agents, onSpawnAgent, onStopAgent, onCreate
           key={agent.id}
           agent={agent}
           onSpawn={() => onSpawnAgent(agent.id)}
+          onDelete={onDeleteAgent ? () => onDeleteAgent(agent.id) : undefined}
         />
       ))}
     </div>

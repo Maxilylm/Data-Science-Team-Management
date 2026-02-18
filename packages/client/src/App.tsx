@@ -38,7 +38,7 @@ const headerStyle: React.CSSProperties = {
 }
 
 export default function App() {
-  const { agents, spawnAgent, stopAgent, sendInput, createAgent } = useAgents()
+  const { agents, spawnAgent, stopAgent, sendInput, createAgent, deleteAgent } = useAgents()
   const { kanbanData, tasksNeedingInput, refetch } = useTasks()
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
   const [feedEvents, setFeedEvents] = useState<FeedEvent[]>([])
@@ -70,6 +70,12 @@ export default function App() {
     stopAgent(agentId)
   }
 
+  const handleDeleteAgent = (agentId: string) => {
+    if (confirm(`Delete agent "${agentId}"? This will remove the agent configuration file.`)) {
+      deleteAgent(agentId)
+    }
+  }
+
   const handleSubmitInput = (agentId: string, input: string) => {
     sendInput({ agentId, input })
   }
@@ -92,6 +98,7 @@ export default function App() {
         agents={agents}
         onSpawnAgent={handleSpawnAgent}
         onStopAgent={handleStopAgent}
+        onDeleteAgent={handleDeleteAgent}
         onCreateAgent={() => setShowCreateDialog(true)}
       />
 

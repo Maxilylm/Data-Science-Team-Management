@@ -57,6 +57,12 @@ export const api = {
     })
   },
 
+  deleteAgent(agentId: string): Promise<{ success: boolean }> {
+    return fetchJson(`${BASE_URL}/agents/${agentId}`, {
+      method: 'DELETE'
+    })
+  },
+
   // Tasks
   getTasks(): Promise<Task[]> {
     return fetchJson(`${BASE_URL}/tasks`)

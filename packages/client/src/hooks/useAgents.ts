@@ -37,6 +37,13 @@ export function useAgents() {
     }
   })
 
+  const deleteMutation = useMutation({
+    mutationFn: api.deleteAgent,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agents'] })
+    }
+  })
+
   return {
     agents,
     isLoading,
@@ -44,6 +51,7 @@ export function useAgents() {
     spawnAgent: spawnMutation.mutate,
     stopAgent: stopMutation.mutate,
     sendInput: sendInputMutation.mutate,
-    createAgent: createMutation.mutate
+    createAgent: createMutation.mutate,
+    deleteAgent: deleteMutation.mutate
   }
 }

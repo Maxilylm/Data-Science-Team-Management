@@ -141,4 +141,23 @@ ${systemPrompt}
       if (sessionId !== undefined) agent.sessionId = sessionId
     }
   }
+
+  async deleteAgent(id: string): Promise<boolean> {
+    const agent = this.agents.get(id)
+    if (!agent) return false
+
+    // Delete the config file
+    try {
+      await fs.unlink(agent.configPath)
+    } catch (error) {
+      const nodeError = error as NodeJS.ErrnoException
+      if (nodeError.code !== 'ENOENT') {
+        throw error
+      }
+    }
+
+    // Remove from memory
+    this.agents.delete(id)
+    return true
+  }
 }

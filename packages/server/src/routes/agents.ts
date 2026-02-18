@@ -111,5 +111,25 @@ export function createAgentsRouter(
     }
   })
 
+  router.delete('/:id', async (req: Request, res: Response) => {
+    const agent = agentService.getAgent(req.params.id)
+    if (!agent) {
+      res.status(404).json({ error: 'Agent not found' })
+      return
+    }
+
+    // Stop the agent if running
+    if (agent.sessionId) {
+      claudeRunner.terminate(agent.sessionId)
+    }
+
+    try {
+      await agentService.deleteAgent(req.params.id)
+      res.json({ success: true })
+    } catch {
+      res.status(500).json({ error: 'Failed to delete agent' })
+    }
+  })
+
   return router
 }
