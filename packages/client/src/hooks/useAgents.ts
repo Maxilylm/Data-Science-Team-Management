@@ -1,0 +1,41 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { api } from '../services/api'
+
+export function useAgents() {
+  const queryClient = useQueryClient()
+
+  const { data: agents = [], isLoading, error } = useQuery({
+    queryKey: ['agents'],
+    queryFn: api.getAgents,
+    refetchInterval: 5000
+  })
+
+  const spawnMutation = useMutation({
+    mutationFn: ({ agentId, prompt }: { agentId: string; prompt: string }) =>
+      api.spawnAgent(agentId, prompt),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agents'] })
+    }
+  })
+
+  const stopMutation = useMutation({
+    mutationFn: api.stopAgent,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['agents'] })
+    }
+  })
+
+  const sendInputMutation = useMutation({
+    mutationFn: ({ agentId, input }: { agentId: string; input: string }) =>
+      api.sendInput(agentId, input)
+  })
+
+  return {
+    agents,
+    isLoading,
+    error,
+    spawnAgent: spawnMutation.mutate,
+    stopAgent: stopMutation.mutate,
+    sendInput: sendInputMutation.mutate
+  }
+}
