@@ -55,4 +55,22 @@ Instructions here.
     expect(agent).toBeDefined()
     expect(agent?.model).toBe('opus')
   })
+
+  it('should return empty array when config directory does not exist', async () => {
+    const nonExistentDir = path.join(os.tmpdir(), 'nonexistent-' + Date.now())
+    const service = new AgentService(nonExistentDir)
+
+    const agents = await service.loadAgents()
+
+    expect(agents).toHaveLength(0)
+  })
+
+  it('should handle invalid frontmatter gracefully', async () => {
+    const invalidConfig = 'no frontmatter here'
+    await fs.writeFile(path.join(testConfigDir, 'invalid.md'), invalidConfig)
+
+    const agents = await service.loadAgents()
+
+    expect(agents).toHaveLength(0)
+  })
 })

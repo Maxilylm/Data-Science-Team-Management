@@ -39,7 +39,11 @@ export class AgentService {
         }
       }
     } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+      const nodeError = error as NodeJS.ErrnoException
+      if (nodeError.code === 'ENOENT') {
+        // Config directory doesn't exist - expected on fresh install
+        console.warn(`Agent config directory not found: ${this.configDir}`)
+      } else {
         throw error
       }
     }
@@ -73,6 +77,18 @@ export class AgentService {
       else if (key === 'description') config.description = value
       else if (key === 'model') config.model = value as 'sonnet' | 'opus' | 'haiku'
       else if (key === 'color') config.color = value
+      else if (key === 'tools') {
+        // Handle comma-separated list or JSON array
+        if (value.startsWith('[')) {
+          try {
+            config.tools = JSON.parse(value)
+          } catch {
+            config.tools = value.replace(/[\[\]]/g, '').split(',').map(t => t.trim())
+          }
+        } else {
+          config.tools = value.split(',').map(t => t.trim()).filter(t => t.length > 0)
+        }
+      }
     }
 
     return config
