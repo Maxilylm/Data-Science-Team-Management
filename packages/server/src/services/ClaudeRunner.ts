@@ -32,9 +32,7 @@ export class ClaudeRunner extends EventEmitter {
       args.push('--model', options.model)
     }
 
-    if (options.projectPath) {
-      args.push('--cwd', options.projectPath)
-    }
+    // Note: --cwd is not a valid claude CLI option (used in display only)
 
     if (options.allowedTools && options.allowedTools.length > 0) {
       for (const tool of options.allowedTools) {
@@ -60,9 +58,8 @@ export class ClaudeRunner extends EventEmitter {
       args.push('--model', options.model)
     }
 
-    if (options.projectPath) {
-      args.push('--cwd', options.projectPath)
-    }
+    // Note: --cwd is not a valid claude CLI option
+    // We set the working directory via spawn's cwd option instead
 
     // Allow specific tools without prompting (for automated runs)
     if (options.allowedTools && options.allowedTools.length > 0) {
