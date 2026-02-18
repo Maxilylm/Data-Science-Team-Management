@@ -77,6 +77,10 @@ export class ClaudeRunner extends EventEmitter {
       env: { ...process.env, FORCE_COLOR: '0' }  // Disable colors for cleaner output
     })
 
+    childProcess.on('error', (err) => {
+      console.error('[ClaudeRunner] Process error:', err)
+    })
+
     const session: RunningSession = {
       process: childProcess,
       agentId: options.agentId,
@@ -85,6 +89,9 @@ export class ClaudeRunner extends EventEmitter {
     }
 
     this.sessions.set(sessionId, session)
+
+    // Close stdin immediately - claude CLI waits for stdin to close before completing
+    childProcess.stdin?.end()
 
     childProcess.stdout?.on('data', (data) => {
       const output = data.toString()

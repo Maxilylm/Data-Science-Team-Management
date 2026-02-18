@@ -37,7 +37,16 @@ async function main() {
   })
 
   // Wire up claude runner status updates
+  claudeRunner.on('output', (event) => {
+    console.log(`[${event.agentId}] stdout:`, event.data)
+  })
+
+  claudeRunner.on('error', (event) => {
+    console.log(`[${event.agentId}] stderr:`, event.data)
+  })
+
   claudeRunner.on('close', (event) => {
+    console.log(`[${event.agentId}] closed with code:`, event.code)
     const agents = agentService.getAllAgents()
     const agent = agents.find(a => a.sessionId === event.sessionId)
     if (agent) {
