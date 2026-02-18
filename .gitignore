@@ -7,3 +7,6 @@ dist/
 .idea
 .vite/
 .env.local
+
+# Git worktrees
+.worktrees/
