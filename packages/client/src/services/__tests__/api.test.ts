@@ -8,20 +8,22 @@ describe('API Service', () => {
 
   it('should fetch agents', async () => {
     const mockAgents = [{ id: 'agent-1', name: 'Agent 1' }]
-    ;(fetch as any).mockResolvedValue({
+    ;(fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
       ok: true,
+      status: 200,
       json: () => Promise.resolve(mockAgents)
     })
 
     const agents = await api.getAgents()
 
-    expect(fetch).toHaveBeenCalledWith('/api/agents', undefined)
+    expect(fetch).toHaveBeenCalledWith('/api/agents', { headers: {} })
     expect(agents).toEqual(mockAgents)
   })
 
   it('should spawn agent with prompt', async () => {
-    ;(fetch as any).mockResolvedValue({
+    ;(fetch as ReturnType<typeof vi.fn>).mockResolvedValue({
       ok: true,
+      status: 200,
       json: () => Promise.resolve({ sessionId: 'session-123' })
     })
 

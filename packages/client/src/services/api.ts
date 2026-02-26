@@ -1,13 +1,57 @@
 import type { Agent, Task, KanbanData, Ticket, TicketPriority, Project, BrowseResult } from '../types'
 
 const BASE_URL = '/api'
+const TOKEN_KEY = 'dashboard-auth-token'
+
+function getAuthHeaders(): Record<string, string> {
+  try {
+    const token = localStorage.getItem(TOKEN_KEY)
+    if (token) {
+      return { Authorization: `Bearer ${token}` }
+    }
+  } catch {
+    // localStorage may not be available in test environments
+  }
+  return {}
+}
 
 async function fetchJson<T>(url: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(url, options)
+  const authHeaders = getAuthHeaders()
+  const headers = {
+    ...authHeaders,
+    ...(options?.headers || {})
+  }
+
+  const response = await fetch(url, { ...options, headers })
+
+  if (response.status === 401) {
+    try {
+      localStorage.removeItem(TOKEN_KEY)
+      window.dispatchEvent(new CustomEvent('auth-expired'))
+    } catch {
+      // Safe for non-browser environments
+    }
+    throw new Error('Authentication expired')
+  }
+
   if (!response.ok) {
     throw new Error(`API error: ${response.status}`)
   }
   return response.json()
+}
+
+export interface ProviderInfo {
+  id: string
+  name: string
+  description: string
+  isAvailable: boolean
+  isActive: boolean
+  config?: Record<string, unknown>
+}
+
+export interface AuthConfig {
+  enabled: boolean
+  tokenCount: number
 }
 
 export const api = {
@@ -181,6 +225,52 @@ export const api = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ answer })
+    })
+  },
+
+  // Settings - Providers
+  getProviders(): Promise<ProviderInfo[]> {
+    return fetchJson(`${BASE_URL}/settings/providers`)
+  },
+
+  setActiveProvider(providerId: string): Promise<{ success: boolean }> {
+    return fetchJson(`${BASE_URL}/settings/provider`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ providerId })
+    })
+  },
+
+  updateProviderConfig(providerId: string, config: Record<string, unknown>): Promise<{ success: boolean }> {
+    return fetchJson(`${BASE_URL}/settings/provider/${providerId}/config`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    })
+  },
+
+  testProvider(providerId: string): Promise<{ providerId: string; isAvailable: boolean }> {
+    return fetchJson(`${BASE_URL}/settings/provider/${providerId}/test`, {
+      method: 'POST'
+    })
+  },
+
+  // Settings - Auth
+  getAuthConfig(): Promise<AuthConfig> {
+    return fetchJson(`${BASE_URL}/settings/auth`)
+  },
+
+  updateAuthConfig(config: { enabled: boolean }): Promise<AuthConfig> {
+    return fetchJson(`${BASE_URL}/settings/auth`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(config)
+    })
+  },
+
+  generateAuthToken(): Promise<{ token: string }> {
+    return fetchJson(`${BASE_URL}/settings/auth/token`, {
+      method: 'POST'
     })
   }
 }
