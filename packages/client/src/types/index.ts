@@ -1,3 +1,24 @@
+export interface Project {
+  id: string
+  name: string
+  path: string
+  createdAt: string
+  lastAccessedAt: string
+}
+
+export interface DirectoryEntry {
+  name: string
+  path: string
+  isDirectory: boolean
+}
+
+export interface BrowseResult {
+  currentPath: string
+  parentPath: string
+  isHome: boolean
+  entries: DirectoryEntry[]
+}
+
 export type AgentStatus = 'idle' | 'running' | 'waiting_input' | 'error'
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'needs_input'
 export type TicketStatus = 'unassigned' | 'pending' | 'in_progress' | 'needs_help' | 'completed'
