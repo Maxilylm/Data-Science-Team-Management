@@ -7,7 +7,7 @@ import * as fs from 'fs'
 import { createConfigRouter } from '../config'
 
 // Mock the config module
-vi.mock('../../config', () => {
+vi.mock('../../config.js', () => {
   let mockConfig = {
     projectPath: '/test/project',
     projectName: 'Test Project',
@@ -114,7 +114,7 @@ describe('Config Routes - Project Management', () => {
   })
 
   it('DELETE /api/config/projects/:id should return 404 for unknown id', async () => {
-    const { removeProject } = await import('../../config')
+    const { removeProject } = await import('../../config.js')
     ;(removeProject as any).mockReturnValueOnce(false)
 
     const res = await request(app).delete('/api/config/projects/nonexistent')
@@ -122,7 +122,7 @@ describe('Config Routes - Project Management', () => {
   })
 
   it('POST /api/config/projects/:id/activate should return 404 for unknown id', async () => {
-    const { setActiveProject } = await import('../../config')
+    const { setActiveProject } = await import('../../config.js')
     ;(setActiveProject as any).mockReturnValueOnce(undefined)
 
     const res = await request(app).post('/api/config/projects/nonexistent/activate')

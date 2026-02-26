@@ -5,16 +5,20 @@ import type { Agent, AgentConfig, AgentInstance, AgentStatus } from '../types/Ag
 export class AgentService {
   private agents: Map<string, Agent> = new Map()
   private configDir: string
-  private fallbackConfigDir: string
+  private defaultConfigDir: string
+  private hasFallback: boolean
 
   constructor(configDir?: string) {
     // Look for .claude/agents in project root (2 levels up from packages/server)
-    this.configDir = configDir || path.join(process.cwd(), '..', '..', '.claude', 'agents')
-    this.fallbackConfigDir = path.join(process.cwd(), '..', '..', '.claude', 'agents')
+    this.defaultConfigDir = path.join(process.cwd(), '..', '..', '.claude', 'agents')
+    this.configDir = configDir || this.defaultConfigDir
+    this.hasFallback = false
   }
 
   setConfigDir(newConfigDir: string): void {
     this.configDir = newConfigDir
+    // Enable fallback to default when switching to a project-specific dir
+    this.hasFallback = newConfigDir !== this.defaultConfigDir
   }
 
   getConfigDir(): string {
@@ -98,9 +102,9 @@ ${systemPrompt}
     // Load from primary config dir first
     await this.loadAgentsFromDir(this.configDir)
 
-    // Then load from fallback dir (only agents not already loaded)
-    if (this.fallbackConfigDir !== this.configDir) {
-      await this.loadAgentsFromDir(this.fallbackConfigDir)
+    // Then load from default dir (only agents not already loaded)
+    if (this.hasFallback) {
+      await this.loadAgentsFromDir(this.defaultConfigDir)
     }
 
     return Array.from(this.agents.values())
