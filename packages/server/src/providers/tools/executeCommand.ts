@@ -17,14 +17,22 @@ const COMMAND_ALLOWLIST = [
   'pip', 'python', 'python3', 'cargo', 'go', 'make'
 ]
 
+const DANGEROUS_PATTERNS = /[;|`]|\$\(|&&|\|\||>>?|<<?/
+
 export function isCommandAllowed(
   command: string,
   allowedTools?: string[]
-): boolean {
+): { allowed: boolean; reason?: string } {
+  if (DANGEROUS_PATTERNS.test(command)) {
+    return {
+      allowed: false,
+      reason: 'Shell operators (;, |, &&, ||, >, <, $(), `) are not allowed for security reasons. Use simple commands only.'
+    }
+  }
   const baseCommand = command.split(/\s/)[0]
-  if (COMMAND_ALLOWLIST.includes(baseCommand)) return true
-  if (allowedTools?.includes(baseCommand)) return true
-  return false
+  if (COMMAND_ALLOWLIST.includes(baseCommand)) return { allowed: true }
+  if (allowedTools?.includes(baseCommand)) return { allowed: true }
+  return { allowed: false, reason: `Command "${baseCommand}" is not in the allowlist` }
 }
 
 export async function executeCommand(
@@ -33,10 +41,9 @@ export async function executeCommand(
   allowedTools?: string[]
 ): Promise<string> {
   const command = input.command
-  if (!isCommandAllowed(command, allowedTools)) {
-    throw new Error(
-      `Command "${command.split(/\s/)[0]}" is not in the allowlist`
-    )
+  const check = isCommandAllowed(command, allowedTools)
+  if (!check.allowed) {
+    throw new Error(check.reason || 'Command not allowed')
   }
 
   const cwd = input.cwd
