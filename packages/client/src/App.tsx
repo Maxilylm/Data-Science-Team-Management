@@ -4,6 +4,7 @@ import { useTasks } from './hooks/useTasks'
 import { useTickets } from './hooks/useTickets'
 import { useProjects } from './hooks/useProjects'
 import { useSSE } from './hooks/useSSE'
+import { useAuth } from './hooks/useAuth'
 import { AgentPanel } from './components/AgentPanel'
 import { TicketBoard } from './components/TicketBoard'
 import { PromptDialog } from './components/PromptDialog'
@@ -13,6 +14,8 @@ import { CreateAgentDialog } from './components/CreateAgentDialog'
 import { CreateTicketDialog } from './components/CreateTicketDialog'
 import { ProjectSwitcher } from './components/ProjectSwitcher/ProjectSwitcher'
 import { ProjectManager } from './components/ProjectManager/ProjectManager'
+import { LoginScreen } from './components/LoginScreen/LoginScreen'
+import { Settings } from './pages/Settings/Settings'
 import NeedsInputPanel from './components/NeedsInputPanel'
 import type { Agent, TicketPriority } from './types'
 
@@ -71,11 +74,13 @@ export default function App() {
   const { tasksNeedingInput, refetch: refetchTasks } = useTasks()
   const { tickets, unassignedTickets, summary, createTicket, updateTicket, assignTicket, deleteTicket, answerTicket, refetch: refetchTickets } = useTickets()
   const { projects, activeProject, activeProjectId, activateProject, createProject, initializeProject, deleteProject, isActivating } = useProjects()
+  const auth = useAuth()
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
   const [feedEvents, setFeedEvents] = useState<FeedEvent[]>([])
   const [showCreateAgentDialog, setShowCreateAgentDialog] = useState(false)
   const [showCreateTicketDialog, setShowCreateTicketDialog] = useState(false)
   const [showProjectManager, setShowProjectManager] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const stored = localStorage.getItem('darkMode')
     return stored ? JSON.parse(stored) : false
@@ -85,18 +90,25 @@ export default function App() {
     localStorage.setItem('darkMode', JSON.stringify(isDarkMode))
   }, [isDarkMode])
 
+  // Listen for auth expiration
+  useEffect(() => {
+    const handler = () => auth.logout()
+    window.addEventListener('auth-expired', handler)
+    return () => window.removeEventListener('auth-expired', handler)
+  }, [auth])
+
   const toggleDarkMode = () => {
     setIsDarkMode((prev: boolean) => !prev)
   }
 
   const handleSSEMessage = useCallback((event: any) => {
     setFeedEvents(prev => [...prev.slice(-99), {
-      type: event.type,
+      type: event.type as string,
       timestamp: new Date(),
-      agentId: event.agentId,
-      data: event.data || event.task?.subject || event.ticket?.title || event.question,
-      ticketId: event.ticketId,
-      question: event.question
+      agentId: event.agentId as string | undefined,
+      data: (event.data || (event.task as Record<string, unknown>)?.subject || (event.ticket as Record<string, unknown>)?.title || event.question) as string | undefined,
+      ticketId: event.ticketId as string | undefined,
+      question: event.question as string | undefined
     }])
     refetchTasks()
     refetchTickets()
@@ -106,10 +118,8 @@ export default function App() {
 
   const handleSpawnAgent = (agentId: string, prompt?: string) => {
     if (prompt) {
-      // Direct spawn with provided prompt (e.g., from Assigner)
       spawnAgent({ agentId, prompt })
     } else {
-      // Show dialog for user to enter prompt
       const agent = agents.find(a => a.id === agentId)
       if (agent) setSelectedAgent(agent)
     }
@@ -172,6 +182,21 @@ export default function App() {
     deleteTicket(ticketId)
   }
 
+  // Show loading while checking auth
+  if (auth.isLoading) {
+    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>Loading...</div>
+  }
+
+  // Show login if auth is enabled and not authenticated
+  if (auth.isAuthEnabled && !auth.isAuthenticated) {
+    return <LoginScreen onLogin={auth.login} isDarkMode={isDarkMode} />
+  }
+
+  // Show settings page
+  if (showSettings) {
+    return <Settings onBack={() => setShowSettings(false)} isDarkMode={isDarkMode} />
+  }
+
   const activeAgentsCount = agents.filter(a => a.status === 'running').length
 
   return (
@@ -217,6 +242,20 @@ export default function App() {
               </div>
             )}
             <button
+              onClick={() => setShowSettings(true)}
+              style={{
+                background: 'none',
+                border: isDarkMode ? '1px solid #374151' : '1px solid #e5e7eb',
+                fontSize: '12px',
+                cursor: 'pointer',
+                padding: '4px 12px',
+                borderRadius: '6px',
+                color: isDarkMode ? '#e5e7eb' : '#374151'
+              }}
+            >
+              Settings
+            </button>
+            <button
               onClick={toggleDarkMode}
               style={{
                 background: 'none',
@@ -232,7 +271,7 @@ export default function App() {
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}
               title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             >
-              {isDarkMode ? '☀️' : '🌙'}
+              {isDarkMode ? 'L' : 'D'}
             </button>
           </div>
         </header>
