@@ -16,8 +16,10 @@ interface MessageContent {
   type: string
   text?: string
   id?: string
+  tool_use_id?: string
   name?: string
   input?: Record<string, unknown>
+  content?: string
 }
 
 interface ApiMessage {
@@ -327,14 +329,14 @@ export class AnthropicApiProvider extends EventEmitter implements AgentProvider 
 
         results.push({
           type: 'tool_result',
-          id: tool.id,
-          text: result
+          tool_use_id: tool.id,
+          content: result
         } as MessageContent)
       } catch (err) {
         results.push({
           type: 'tool_result',
-          id: tool.id,
-          text: `Error: ${(err as Error).message}`
+          tool_use_id: tool.id,
+          content: `Error: ${(err as Error).message}`
         } as MessageContent)
       }
     }
