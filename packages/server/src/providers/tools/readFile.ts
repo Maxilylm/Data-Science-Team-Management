@@ -7,8 +7,18 @@ export interface ReadFileInput {
 
 export function validatePath(filePath: string, projectPath: string): string {
   const resolved = path.resolve(projectPath, filePath)
-  if (!resolved.startsWith(path.resolve(projectPath))) {
+  // Check textual prefix first (for files that don't exist yet -- writeFile)
+  const normalizedProject = path.resolve(projectPath) + path.sep
+  if (!resolved.startsWith(normalizedProject) && resolved !== path.resolve(projectPath)) {
     throw new Error(`Path "${filePath}" is outside the project directory`)
+  }
+  // For existing files, also check after resolving symlinks
+  if (fs.existsSync(resolved)) {
+    const realPath = fs.realpathSync(resolved)
+    const realProject = fs.realpathSync(path.resolve(projectPath)) + path.sep
+    if (!realPath.startsWith(realProject) && realPath !== fs.realpathSync(path.resolve(projectPath))) {
+      throw new Error(`Path "${filePath}" resolves to outside the project directory (symlink)`)
+    }
   }
   return resolved
 }
