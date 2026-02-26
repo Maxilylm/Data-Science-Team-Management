@@ -1,3 +1,11 @@
+export interface Project {
+  id: string
+  name: string
+  path: string
+  createdAt: string
+  lastAccessedAt: string
+}
+
 export type AgentStatus = 'idle' | 'running' | 'waiting_input' | 'error'
 export type ModelType = 'sonnet' | 'opus' | 'haiku'
 export type TicketStatus = 'unassigned' | 'pending' | 'in_progress' | 'needs_help' | 'completed'

@@ -5,10 +5,20 @@ import type { Agent, AgentConfig, AgentInstance, AgentStatus } from '../types/Ag
 export class AgentService {
   private agents: Map<string, Agent> = new Map()
   private configDir: string
+  private fallbackConfigDir: string
 
   constructor(configDir?: string) {
     // Look for .claude/agents in project root (2 levels up from packages/server)
     this.configDir = configDir || path.join(process.cwd(), '..', '..', '.claude', 'agents')
+    this.fallbackConfigDir = path.join(process.cwd(), '..', '..', '.claude', 'agents')
+  }
+
+  setConfigDir(newConfigDir: string): void {
+    this.configDir = newConfigDir
+  }
+
+  getConfigDir(): string {
+    return this.configDir
   }
 
   async createAgent(id: string, config: AgentConfig, systemPrompt: string): Promise<Agent> {
@@ -43,20 +53,20 @@ ${systemPrompt}
     return agent
   }
 
-  async loadAgents(): Promise<Agent[]> {
-    this.agents.clear()
-
+  private async loadAgentsFromDir(dir: string): Promise<void> {
     try {
-      const files = await fs.readdir(this.configDir)
+      const files = await fs.readdir(dir)
       const mdFiles = files.filter(f => f.endsWith('.md'))
 
       for (const file of mdFiles) {
-        const filePath = path.join(this.configDir, file)
+        const id = path.basename(file, '.md')
+        if (this.agents.has(id)) continue // primary dir takes precedence
+
+        const filePath = path.join(dir, file)
         const content = await fs.readFile(filePath, 'utf-8')
         const config = this.parseFrontmatter(content)
 
         if (config) {
-          const id = path.basename(file, '.md')
           const agent: Agent = {
             id,
             name: config.name || id,
@@ -75,11 +85,22 @@ ${systemPrompt}
     } catch (error) {
       const nodeError = error as NodeJS.ErrnoException
       if (nodeError.code === 'ENOENT') {
-        // Config directory doesn't exist - expected on fresh install
-        console.warn(`Agent config directory not found: ${this.configDir}`)
+        console.warn(`Agent config directory not found: ${dir}`)
       } else {
         throw error
       }
+    }
+  }
+
+  async loadAgents(): Promise<Agent[]> {
+    this.agents.clear()
+
+    // Load from primary config dir first
+    await this.loadAgentsFromDir(this.configDir)
+
+    // Then load from fallback dir (only agents not already loaded)
+    if (this.fallbackConfigDir !== this.configDir) {
+      await this.loadAgentsFromDir(this.fallbackConfigDir)
     }
 
     return Array.from(this.agents.values())

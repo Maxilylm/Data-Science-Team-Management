@@ -196,7 +196,15 @@ Ticket ID: ${instance.ticketId}`
   app.use('/api/tasks', createTasksRouter(taskService))
   app.use('/api/tickets', createTicketsRouter(ticketService, claudeRunner, agentService))
   app.use('/api/events', createEventsRouter(fileWatcher, claudeRunner, ticketService, workflowService))
-  app.use('/api/config', createConfigRouter())
+  app.use('/api/config', createConfigRouter({
+    onProjectSwitch: async (projectPath: string) => {
+      const newAgentsDir = path.join(projectPath, '.claude', 'agents')
+      agentService.setConfigDir(newAgentsDir)
+      await agentService.loadAgents()
+      console.log(`[Project] Switched to: ${projectPath}`)
+      console.log(`[Project] Reloaded ${agentService.getAllAgents().length} agents`)
+    }
+  }))
 
   // Health check
   app.get('/health', (_req, res) => {
