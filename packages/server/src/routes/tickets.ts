@@ -1,43 +1,39 @@
 import { Router, Request, Response } from 'express'
-import type { TicketService } from '../services/TicketService'
-import type { ClaudeRunner } from '../services/ClaudeRunner'
-import type { AgentService } from '../services/AgentService'
-import type { TicketStatus, TicketPriority } from '../types/Agent'
-import { getConfig } from '../config'
+import * as fs from 'fs'
+import * as path from 'path'
+import type { TicketService } from '../services/TicketService.js'
+import type { ProviderManager } from '../providers/ProviderManager.js'
+import type { AgentService } from '../services/AgentService.js'
+import type { TicketStatus, TicketPriority } from '../types/Agent.js'
+import { getConfig } from '../config.js'
 
 export function createTicketsRouter(
   ticketService: TicketService,
-  claudeRunner?: ClaudeRunner,
+  providerManager?: ProviderManager,
   agentService?: AgentService
 ): Router {
   const router = Router()
 
-  // Get all tickets
   router.get('/', (_req: Request, res: Response) => {
     res.json(ticketService.getAllTickets())
   })
 
-  // Get ticket summary
   router.get('/summary', (_req: Request, res: Response) => {
     res.json(ticketService.getSummary())
   })
 
-  // Get unassigned tickets
   router.get('/unassigned', (_req: Request, res: Response) => {
     res.json(ticketService.getUnassignedTickets())
   })
 
-  // Get tickets needing help
   router.get('/needs-help', (_req: Request, res: Response) => {
     res.json(ticketService.getTicketsNeedingHelp())
   })
 
-  // Get tickets by agent
   router.get('/agent/:agentId', (req: Request, res: Response) => {
     res.json(ticketService.getTicketsByAgent(req.params.agentId))
   })
 
-  // Get single ticket
   router.get('/:id', (req: Request, res: Response) => {
     const ticket = ticketService.getTicket(req.params.id)
     if (!ticket) {
@@ -47,7 +43,6 @@ export function createTicketsRouter(
     res.json(ticket)
   })
 
-  // Create ticket
   router.post('/', (req: Request, res: Response) => {
     const { title, description, assignedTo, priority, parentTicketId, tags, createdBy } = req.body
 
@@ -69,7 +64,6 @@ export function createTicketsRouter(
     res.status(201).json(ticket)
   })
 
-  // Update ticket
   router.patch('/:id', (req: Request, res: Response) => {
     const { title, description, status, priority, assignedTo, tags } = req.body
 
@@ -98,24 +92,25 @@ export function createTicketsRouter(
       return
     }
 
-    // Auto-start the assigned agent if requested and services are available
-    if (autoStart && agentId && claudeRunner && agentService) {
+    if (autoStart && agentId && providerManager && agentService) {
       const agent = agentService.getAgent(agentId.toLowerCase())
       if (agent) {
         try {
           const config = getConfig()
           const prompt = `Work on ticket: "${ticket.title}"\n\nDescription: ${ticket.description}\n\nTicket ID: ${ticket.id}\nPriority: ${ticket.priority}\nTags: ${ticket.tags.join(', ') || 'none'}`
 
-          const sessionId = await claudeRunner.spawn({
+          const systemPrompt = readAgentSystemPrompt(agent.id)
+
+          const sessionId = await providerManager.spawn({
             agentId: agent.id,
-            prompt,
+            userPrompt: prompt,
+            systemPrompt,
             projectPath: config.projectPath,
             model: agent.model,
-            allowedTools: agent.tools,
+            tools: agent.tools,
             ticketId: ticket.id
           })
 
-          // Create instance for tracking
           const instanceId = `inst-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
           agentService.addInstance(agent.id, {
             instanceId,
@@ -126,9 +121,7 @@ export function createTicketsRouter(
             ticketId: ticket.id
           })
 
-          // Update ticket status to in_progress
           ticketService.updateTicket(ticket.id, { status: 'in_progress' })
-
           console.log(`[Ticket] Auto-started ${agent.id} for ticket: ${ticket.title}`)
         } catch (err) {
           console.error(`[Ticket] Failed to auto-start agent ${agentId}:`, err)
@@ -139,7 +132,6 @@ export function createTicketsRouter(
     res.json(ticket)
   })
 
-  // Request help
   router.post('/:id/help', (req: Request, res: Response) => {
     const { fromAgent, message, targetAgent } = req.body
     if (!fromAgent || !message) {
@@ -155,7 +147,6 @@ export function createTicketsRouter(
     res.json(ticket)
   })
 
-  // Resolve help request
   router.post('/:id/resolve-help', (req: Request, res: Response) => {
     const ticket = ticketService.resolveHelp(req.params.id)
     if (!ticket) {
@@ -165,7 +156,7 @@ export function createTicketsRouter(
     res.json(ticket)
   })
 
-  // Answer a question from an agent (send input and resume)
+  // Answer a question from an agent
   router.post('/:id/answer', async (req: Request, res: Response) => {
     const { answer } = req.body
     if (!answer) {
@@ -179,25 +170,24 @@ export function createTicketsRouter(
       return
     }
 
-    if (!claudeRunner || !agentService) {
+    if (!providerManager || !agentService) {
       res.status(500).json({ error: 'Services not available' })
       return
     }
 
-    // Find the agent assigned to this ticket
-    const agent = ticket.assignedTo ? agentService.getAgent(ticket.assignedTo.toLowerCase()) : null
+    const agent = ticket.assignedTo
+      ? agentService.getAgent(ticket.assignedTo.toLowerCase())
+      : null
     if (!agent) {
       res.status(400).json({ error: 'No agent assigned to this ticket' })
       return
     }
 
-    // Check if there's a running instance we can send input to
+    // Try to send input to running instance
     const runningInstance = agent.instances.find(i => i.ticketId === ticket.id)
     if (runningInstance) {
-      // Try to send input to running process
-      const success = claudeRunner.sendInput(runningInstance.sessionId, answer)
+      const success = providerManager.sendInput(runningInstance.sessionId, answer)
       if (success) {
-        // Update ticket status back to in_progress
         const updatedTicket = ticketService.updateTicket(ticket.id, {
           status: 'in_progress',
           helpRequest: undefined
@@ -208,11 +198,8 @@ export function createTicketsRouter(
       }
     }
 
-    // No running instance or input failed - respawn the agent with the answer as context
-    // Note: Claude CLI --resume requires UUID session IDs which we don't have
-    // So we provide the answer as continuation context in a new prompt
+    // Respawn with answer context
     const config = getConfig()
-
     try {
       const prompt = `Continue working on ticket: "${ticket.title}"
 
@@ -226,17 +213,18 @@ Please continue implementing based on this answer.
 
 Ticket ID: ${ticket.id}`
 
-      const sessionId = await claudeRunner.spawn({
+      const systemPrompt = readAgentSystemPrompt(agent.id)
+
+      const sessionId = await providerManager.spawn({
         agentId: agent.id,
-        prompt,
+        userPrompt: prompt,
+        systemPrompt,
         projectPath: config.projectPath,
         model: agent.model,
-        allowedTools: agent.tools,
+        tools: agent.tools,
         ticketId: ticket.id
-        // Don't use resumeSessionId - our session IDs aren't valid UUIDs for Claude CLI
       })
 
-      // Create new instance for tracking
       const instanceId = `inst-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
       agentService.addInstance(agent.id, {
         instanceId,
@@ -247,7 +235,6 @@ Ticket ID: ${ticket.id}`
         ticketId: ticket.id
       })
 
-      // Update ticket status back to in_progress
       const updatedTicket = ticketService.updateTicket(ticket.id, {
         status: 'in_progress',
         helpRequest: undefined
@@ -261,7 +248,6 @@ Ticket ID: ${ticket.id}`
     }
   })
 
-  // Delete ticket
   router.delete('/:id', (req: Request, res: Response) => {
     const success = ticketService.deleteTicket(req.params.id)
     if (!success) {
@@ -272,4 +258,18 @@ Ticket ID: ${ticket.id}`
   })
 
   return router
+}
+
+function readAgentSystemPrompt(agentId: string): string | undefined {
+  try {
+    const agentPath = path.join(
+      process.cwd(), '..', '..', '.claude', 'agents', `${agentId}.md`
+    )
+    if (fs.existsSync(agentPath)) {
+      return fs.readFileSync(agentPath, 'utf-8')
+    }
+  } catch {
+    // Ignore errors
+  }
+  return undefined
 }

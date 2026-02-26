@@ -1,12 +1,12 @@
 import { Router, Request, Response } from 'express'
-import type { FileWatcher } from '../services/FileWatcher'
-import type { ClaudeRunner } from '../services/ClaudeRunner'
-import type { TicketService } from '../services/TicketService'
-import type { WorkflowService } from '../services/WorkflowService'
+import type { FileWatcher } from '../services/FileWatcher.js'
+import type { ProviderManager } from '../providers/ProviderManager.js'
+import type { TicketService } from '../services/TicketService.js'
+import type { WorkflowService } from '../services/WorkflowService.js'
 
 export function createEventsRouter(
   fileWatcher: FileWatcher,
-  claudeRunner: ClaudeRunner,
+  providerManager: ProviderManager,
   ticketService?: TicketService,
   workflowService?: WorkflowService
 ): Router {
@@ -39,19 +39,19 @@ export function createEventsRouter(
     broadcast({ type: 'taskChange', ...event })
   })
 
-  claudeRunner.on('output', (event) => {
+  providerManager.on('output', (event) => {
     broadcast({ type: 'agentOutput', ...event })
   })
 
-  claudeRunner.on('close', (event) => {
+  providerManager.on('close', (event) => {
     broadcast({ type: 'agentClosed', ...event })
   })
 
-  claudeRunner.on('question', (event) => {
+  providerManager.on('question', (event) => {
     broadcast({ type: 'agentQuestion', ...event })
   })
 
-  claudeRunner.on('inputProvided', (event) => {
+  providerManager.on('inputProvided', (event) => {
     broadcast({ type: 'agentInputProvided', ...event })
   })
 

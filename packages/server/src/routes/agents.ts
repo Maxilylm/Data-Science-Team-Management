@@ -1,11 +1,13 @@
 import { Router, Request, Response } from 'express'
-import type { AgentService } from '../services/AgentService'
-import type { ClaudeRunner } from '../services/ClaudeRunner'
-import { getConfig } from '../config'
+import * as fs from 'fs'
+import * as path from 'path'
+import type { AgentService } from '../services/AgentService.js'
+import type { ProviderManager } from '../providers/ProviderManager.js'
+import { getConfig } from '../config.js'
 
 export function createAgentsRouter(
   agentService: AgentService,
-  claudeRunner: ClaudeRunner
+  providerManager: ProviderManager
 ): Router {
   const router = Router()
 
@@ -23,7 +25,6 @@ export function createAgentsRouter(
       return
     }
 
-    // Check if agent already exists
     if (agentService.getAgent(id)) {
       res.status(409).json({ error: 'Agent with this ID already exists' })
       return
@@ -64,22 +65,22 @@ export function createAgentsRouter(
     }
 
     try {
-      // If resume is requested and agent has a previous session, resume it
-      const resumeSessionId = resume ? agent.lastSessionId : undefined
-      // Use provided projectPath or fall back to config
       const config = getConfig()
       const workingPath = projectPath || config.projectPath
 
-      const sessionId = await claudeRunner.spawn({
+      // Read agent's system prompt from .md file for API providers
+      const systemPrompt = readAgentSystemPrompt(agent.id)
+
+      const sessionId = await providerManager.spawn({
         agentId: agent.id,
-        prompt,
+        userPrompt: prompt,
+        systemPrompt,
         projectPath: workingPath,
         model: agent.model,
-        resumeSessionId,
-        allowedTools: agent.tools
+        tools: agent.tools,
+        resumeSessionId: resume ? agent.lastSessionId : undefined
       })
 
-      // Create instance for tracking
       const instanceId = `inst-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
       agentService.addInstance(agent.id, {
         instanceId,
@@ -90,7 +91,7 @@ export function createAgentsRouter(
         parentInstanceId
       })
 
-      res.json({ sessionId, instanceId, agentId: agent.id, resumed: !!resumeSessionId })
+      res.json({ sessionId, instanceId, agentId: agent.id, resumed: !!resume })
     } catch {
       res.status(500).json({ error: 'Failed to spawn agent' })
     }
@@ -104,7 +105,7 @@ export function createAgentsRouter(
     }
 
     const { input } = req.body
-    const success = claudeRunner.sendInput(agent.sessionId, input)
+    const success = providerManager.sendInput(agent.sessionId, input)
 
     if (success) {
       res.json({ success: true })
@@ -120,7 +121,7 @@ export function createAgentsRouter(
       return
     }
 
-    const success = claudeRunner.terminate(agent.sessionId)
+    const success = providerManager.terminate(agent.sessionId)
     if (success) {
       agentService.updateAgentStatus(agent.id, 'idle', undefined)
       res.json({ success: true })
@@ -136,9 +137,8 @@ export function createAgentsRouter(
       return
     }
 
-    // Stop the agent if running
     if (agent.sessionId) {
-      claudeRunner.terminate(agent.sessionId)
+      providerManager.terminate(agent.sessionId)
     }
 
     try {
@@ -150,4 +150,18 @@ export function createAgentsRouter(
   })
 
   return router
+}
+
+function readAgentSystemPrompt(agentId: string): string | undefined {
+  try {
+    const agentPath = path.join(
+      process.cwd(), '..', '..', '.claude', 'agents', `${agentId}.md`
+    )
+    if (fs.existsSync(agentPath)) {
+      return fs.readFileSync(agentPath, 'utf-8')
+    }
+  } catch {
+    // Ignore errors reading agent prompt
+  }
+  return undefined
 }

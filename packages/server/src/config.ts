@@ -1,17 +1,14 @@
 import * as fs from 'fs'
 import * as path from 'path'
 import type { Project } from './types/Agent.js'
+import type { ProviderConfig, SecretsConfig } from './providers/types.js'
 
 export interface DashboardConfig {
   projectPath: string
   projectName: string
   activeProjectId: string | null
   projects: Project[]
-}
-
-interface LegacyConfig {
-  projectPath?: string
-  projectName?: string
+  provider?: ProviderConfig
 }
 
 interface StoredConfig {
@@ -19,6 +16,7 @@ interface StoredConfig {
   projectName?: string
   activeProjectId?: string | null
   projects?: Project[]
+  provider?: ProviderConfig
 }
 
 function getConfigPath(): string {
@@ -26,8 +24,18 @@ function getConfigPath(): string {
     || path.join(process.cwd(), '..', '..', '.claude', 'dashboard-config.json')
 }
 
+const SECRETS_PATH = path.join(process.cwd(), '..', '..', '.claude', 'secrets.json')
+
 const DEFAULT_PROJECT_PATH = path.join(process.cwd(), '..', '..')
 const DEFAULT_PROJECT_NAME = 'Data Science Team Management'
+
+const DEFAULT_SECRETS: SecretsConfig = {
+  providers: {},
+  auth: {
+    enabled: false,
+    tokens: []
+  }
+}
 
 function generateProjectId(): string {
   return `proj-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
@@ -41,7 +49,8 @@ function migrateConfig(raw: StoredConfig): DashboardConfig {
       projectPath: activeProject?.path || raw.projectPath || DEFAULT_PROJECT_PATH,
       projectName: activeProject?.name || raw.projectName || DEFAULT_PROJECT_NAME,
       activeProjectId: raw.activeProjectId || null,
-      projects: raw.projects
+      projects: raw.projects,
+      provider: raw.provider || { active: 'claude-cli', configs: {} }
     }
   }
 
@@ -61,7 +70,8 @@ function migrateConfig(raw: StoredConfig): DashboardConfig {
     projectPath,
     projectName,
     activeProjectId: project.id,
-    projects: [project]
+    projects: [project],
+    provider: raw.provider || { active: 'claude-cli', configs: {} }
   }
 }
 
@@ -115,6 +125,38 @@ export function saveConfig(updates: Partial<DashboardConfig>): DashboardConfig {
   const updated = { ...current, ...updates }
   persistConfig(updated)
   return updated
+}
+
+export function loadSecrets(): SecretsConfig {
+  try {
+    if (fs.existsSync(SECRETS_PATH)) {
+      const content = fs.readFileSync(SECRETS_PATH, 'utf-8')
+      return { ...DEFAULT_SECRETS, ...JSON.parse(content) }
+    }
+  } catch (error) {
+    console.warn('Failed to load secrets, using defaults:', error)
+  }
+  return DEFAULT_SECRETS
+}
+
+export function saveSecrets(secrets: Partial<SecretsConfig>): SecretsConfig {
+  const current = loadSecrets()
+  const updated = { ...current, ...secrets }
+
+  const secretsDir = path.dirname(SECRETS_PATH)
+  if (!fs.existsSync(secretsDir)) {
+    fs.mkdirSync(secretsDir, { recursive: true })
+  }
+
+  fs.writeFileSync(SECRETS_PATH, JSON.stringify(updated, null, 2), {
+    mode: 0o600
+  })
+  return updated
+}
+
+export function maskApiKey(key: string): string {
+  if (key.length <= 8) return '****'
+  return '****' + key.slice(-4)
 }
 
 // Singleton config instance
