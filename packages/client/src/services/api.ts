@@ -1,4 +1,4 @@
-import type { Agent, Task, KanbanData, Ticket, TicketPriority } from '../types'
+import type { Agent, Task, KanbanData, Ticket, TicketPriority, Project, BrowseResult } from '../types'
 
 const BASE_URL = '/api'
 
@@ -95,6 +95,40 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(config)
     })
+  },
+
+  // Projects
+  getProjects(): Promise<{ projects: Project[]; activeProjectId: string | null }> {
+    return fetchJson(`${BASE_URL}/config/projects`)
+  },
+
+  createProject(data: { name: string; path: string }): Promise<Project> {
+    return fetchJson(`${BASE_URL}/config/projects`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+  },
+
+  initializeProject(data: { name: string; path: string }): Promise<Project> {
+    return fetchJson(`${BASE_URL}/config/projects/create`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    })
+  },
+
+  deleteProject(id: string): Promise<{ success: boolean }> {
+    return fetchJson(`${BASE_URL}/config/projects/${id}`, { method: 'DELETE' })
+  },
+
+  activateProject(id: string): Promise<Project> {
+    return fetchJson(`${BASE_URL}/config/projects/${id}/activate`, { method: 'POST' })
+  },
+
+  browseDirectory(path?: string): Promise<BrowseResult> {
+    const params = path ? `?path=${encodeURIComponent(path)}` : ''
+    return fetchJson(`${BASE_URL}/config/filesystem/browse${params}`)
   },
 
   // Tickets

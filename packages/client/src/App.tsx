@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { useAgents } from './hooks/useAgents'
 import { useTasks } from './hooks/useTasks'
 import { useTickets } from './hooks/useTickets'
+import { useProjects } from './hooks/useProjects'
 import { useSSE } from './hooks/useSSE'
 import { AgentPanel } from './components/AgentPanel'
 import { TicketBoard } from './components/TicketBoard'
@@ -10,8 +11,9 @@ import { InputRequired } from './components/InputRequired'
 import { LiveFeed } from './components/LiveFeed'
 import { CreateAgentDialog } from './components/CreateAgentDialog'
 import { CreateTicketDialog } from './components/CreateTicketDialog'
+import { ProjectSwitcher } from './components/ProjectSwitcher/ProjectSwitcher'
+import { ProjectManager } from './components/ProjectManager/ProjectManager'
 import NeedsInputPanel from './components/NeedsInputPanel'
-import { api } from './services/api'
 import type { Agent, TicketPriority } from './types'
 
 interface FeedEvent {
@@ -68,21 +70,16 @@ export default function App() {
   const { agents, spawnAgent, stopAgent, sendInput, createAgent, deleteAgent } = useAgents()
   const { tasksNeedingInput, refetch: refetchTasks } = useTasks()
   const { tickets, unassignedTickets, summary, createTicket, updateTicket, assignTicket, deleteTicket, answerTicket, refetch: refetchTickets } = useTickets()
+  const { projects, activeProject, activeProjectId, activateProject, createProject, initializeProject, deleteProject, isActivating } = useProjects()
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
   const [feedEvents, setFeedEvents] = useState<FeedEvent[]>([])
   const [showCreateAgentDialog, setShowCreateAgentDialog] = useState(false)
   const [showCreateTicketDialog, setShowCreateTicketDialog] = useState(false)
-  const [projectConfig, setProjectConfig] = useState<{ projectPath: string; projectName: string } | null>(null)
-  const [showConfigEdit, setShowConfigEdit] = useState(false)
-  const [editPath, setEditPath] = useState('')
+  const [showProjectManager, setShowProjectManager] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const stored = localStorage.getItem('darkMode')
     return stored ? JSON.parse(stored) : false
   })
-
-  useEffect(() => {
-    api.getConfig().then(setProjectConfig)
-  }, [])
 
   useEffect(() => {
     localStorage.setItem('darkMode', JSON.stringify(isDarkMode))
@@ -90,14 +87,6 @@ export default function App() {
 
   const toggleDarkMode = () => {
     setIsDarkMode((prev: boolean) => !prev)
-  }
-
-  const handleUpdateConfig = async () => {
-    if (editPath) {
-      const updated = await api.updateConfig({ projectPath: editPath })
-      setProjectConfig(updated)
-      setShowConfigEdit(false)
-    }
   }
 
   const handleSSEMessage = useCallback((event: any) => {
@@ -198,47 +187,18 @@ export default function App() {
 
       <div style={mainStyle}>
         <header style={getHeaderStyle(isDarkMode)}>
-          <div>
-            <h1 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '4px' }}>
-              {projectConfig?.projectName || 'Agent Team Dashboard'}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <h1 style={{ fontSize: '24px', fontWeight: 700, margin: 0 }}>
+              Agent Team Dashboard
             </h1>
-            {!showConfigEdit ? (
-              <div
-                onClick={() => { setEditPath(projectConfig?.projectPath || ''); setShowConfigEdit(true); }}
-                style={{ fontSize: '12px', color: '#666', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
-                title="Click to change project path"
-              >
-                📁 {projectConfig?.projectPath || 'No project configured'}
-                <span style={{ fontSize: '10px', color: '#999' }}>(click to edit)</span>
-              </div>
-            ) : (
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <input
-                  type="text"
-                  value={editPath}
-                  onChange={(e) => setEditPath(e.target.value)}
-                  style={{ padding: '4px 8px', fontSize: '12px', width: '400px', border: '1px solid #ddd', borderRadius: '4px' }}
-                  placeholder="/path/to/your/project"
-                  autoFocus
-                />
-                <button
-                  onClick={handleUpdateConfig}
-                  style={{ padding: '4px 8px', fontSize: '12px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', transition: 'background-color 0.2s' }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#059669'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#10b981'}
-                >
-                  Save
-                </button>
-                <button
-                  onClick={() => setShowConfigEdit(false)}
-                  style={{ padding: '4px 8px', fontSize: '12px', backgroundColor: '#f3f4f6', border: 'none', borderRadius: '4px', cursor: 'pointer', transition: 'background-color 0.2s' }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e5e7eb'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
+            <ProjectSwitcher
+              projects={projects}
+              activeProject={activeProject}
+              isActivating={isActivating}
+              onActivate={activateProject}
+              onManageProjects={() => setShowProjectManager(true)}
+              isDarkMode={isDarkMode}
+            />
           </div>
           <div style={statsStyle}>
             <div style={statBadgeStyle('#10b981')}>
@@ -327,6 +287,18 @@ export default function App() {
         isOpen={showCreateTicketDialog}
         onSubmit={handleCreateTicket}
         onClose={() => setShowCreateTicketDialog(false)}
+        isDarkMode={isDarkMode}
+      />
+
+      <ProjectManager
+        isOpen={showProjectManager}
+        projects={projects}
+        activeProjectId={activeProjectId}
+        onClose={() => setShowProjectManager(false)}
+        onAddExisting={createProject}
+        onCreateNew={initializeProject}
+        onRemove={deleteProject}
+        onActivate={activateProject}
         isDarkMode={isDarkMode}
       />
     </div>
