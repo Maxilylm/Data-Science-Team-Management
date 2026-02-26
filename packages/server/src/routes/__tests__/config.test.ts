@@ -89,15 +89,27 @@ describe('Config Routes - Project Management', () => {
   })
 
   it('POST /api/config/projects should reject non-existent directory', async () => {
+    const homeDir = os.homedir()
     const res = await request(app).post('/api/config/projects').send({
       name: 'Test',
-      path: '/nonexistent/path/that/does/not/exist'
+      path: path.join(homeDir, 'nonexistent-path-that-does-not-exist')
     })
     expect(res.status).toBe(400)
+    expect(res.body.error).toBe('Directory does not exist')
   })
 
-  it('POST /api/config/projects should accept existing directory', async () => {
-    const tmpDir = path.join(os.tmpdir(), `test-proj-${Date.now()}`)
+  it('POST /api/config/projects should reject path outside home directory', async () => {
+    const res = await request(app).post('/api/config/projects').send({
+      name: 'Dangerous',
+      path: '/etc'
+    })
+    expect(res.status).toBe(400)
+    expect(res.body.error).toBe('Path must be within home directory')
+  })
+
+  it('POST /api/config/projects should accept existing directory within home', async () => {
+    const homeDir = os.homedir()
+    const tmpDir = path.join(homeDir, `.test-proj-${Date.now()}`)
     fs.mkdirSync(tmpDir, { recursive: true })
 
     try {

@@ -92,6 +92,11 @@ export function createConfigRouter(options?: ConfigRouterOptions): Router {
 
     const resolved = path.resolve(projectPath)
 
+    if (!isPathSafe(resolved)) {
+      res.status(400).json({ error: 'Path must be within home directory' })
+      return
+    }
+
     if (!fs.existsSync(resolved)) {
       res.status(400).json({ error: 'Directory does not exist' })
       return
