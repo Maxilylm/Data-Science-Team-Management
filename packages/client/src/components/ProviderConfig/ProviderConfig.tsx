@@ -63,6 +63,20 @@ export function ProviderConfig({
               <p style={{ fontSize: '13px', color: isDarkMode ? '#9ca3af' : '#6b7280' }}>
                 {provider.description}
               </p>
+              {provider.id === 'anthropic-api' && (
+                <span style={{
+                  fontSize: '10px',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  backgroundColor: '#fef3c7',
+                  color: '#92400e',
+                  fontWeight: 600,
+                  marginTop: '4px',
+                  display: 'inline-block'
+                }}>
+                  EXPERIMENTAL
+                </span>
+              )}
             </div>
             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
               <span style={{

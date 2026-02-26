@@ -42,8 +42,8 @@ const QUESTION_PATTERNS = [
 
 export class AnthropicApiProvider extends EventEmitter implements AgentProvider {
   readonly id = 'anthropic-api'
-  readonly name = 'Anthropic API'
-  readonly description = 'Direct API calls to Anthropic Messages API'
+  readonly name = 'Anthropic API (Experimental)'
+  readonly description = 'Direct API calls to Anthropic Messages API. This provider is experimental — Claude CLI is recommended for production use.'
 
   private sessions: Map<string, ApiSession> = new Map()
   private apiKey: string = ''
