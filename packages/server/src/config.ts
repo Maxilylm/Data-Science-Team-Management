@@ -21,7 +21,10 @@ interface StoredConfig {
   projects?: Project[]
 }
 
-const CONFIG_PATH = path.join(process.cwd(), '..', '..', '.claude', 'dashboard-config.json')
+function getConfigPath(): string {
+  return process.env.DASHBOARD_CONFIG_PATH
+    || path.join(process.cwd(), '..', '..', '.claude', 'dashboard-config.json')
+}
 
 const DEFAULT_PROJECT_PATH = path.join(process.cwd(), '..', '..')
 const DEFAULT_PROJECT_NAME = 'Data Science Team Management'
@@ -64,10 +67,18 @@ function migrateConfig(raw: StoredConfig): DashboardConfig {
 
 export function loadConfig(): DashboardConfig {
   try {
-    if (fs.existsSync(CONFIG_PATH)) {
-      const content = fs.readFileSync(CONFIG_PATH, 'utf-8')
+    if (fs.existsSync(getConfigPath())) {
+      const content = fs.readFileSync(getConfigPath(), 'utf-8')
       const raw = JSON.parse(content) as StoredConfig
-      return migrateConfig(raw)
+      const migrated = migrateConfig(raw)
+
+      // If the raw config lacked a projects array, persist the migrated version
+      // so that the generated projectId is stable across restarts
+      if (!raw.projects || !Array.isArray(raw.projects)) {
+        persistConfig(migrated)
+      }
+
+      return migrated
     }
   } catch (error) {
     console.warn('Failed to load dashboard config, using defaults:', error)
@@ -92,11 +103,11 @@ export function loadConfig(): DashboardConfig {
 }
 
 function persistConfig(config: DashboardConfig): void {
-  const configDir = path.dirname(CONFIG_PATH)
+  const configDir = path.dirname(getConfigPath())
   if (!fs.existsSync(configDir)) {
     fs.mkdirSync(configDir, { recursive: true })
   }
-  fs.writeFileSync(CONFIG_PATH, JSON.stringify(config, null, 2))
+  fs.writeFileSync(getConfigPath(), JSON.stringify(config, null, 2))
 }
 
 export function saveConfig(updates: Partial<DashboardConfig>): DashboardConfig {
