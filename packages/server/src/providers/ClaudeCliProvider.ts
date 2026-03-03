@@ -120,6 +120,10 @@ export class ClaudeCliProvider extends EventEmitter implements AgentProvider {
 
     if (options.resumeSessionId) {
       args.push('--resume', options.resumeSessionId)
+    } else if (options.systemPrompt) {
+      // Use --system-prompt so the agent works in any project directory
+      // (--agent looks for .claude/agents/<id>.md in the cwd which may not exist)
+      args.push('--system-prompt', options.systemPrompt)
     } else if (options.agentId) {
       args.push('--agent', options.agentId)
     }
