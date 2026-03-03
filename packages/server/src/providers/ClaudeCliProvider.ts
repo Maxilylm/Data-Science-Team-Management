@@ -43,10 +43,14 @@ export class ClaudeCliProvider extends EventEmitter implements AgentProvider {
 
     const args = this.buildArgs(options)
 
+    const env = { ...process.env, FORCE_COLOR: '0' }
+    // Remove CLAUDECODE env var to prevent "nested session" error
+    delete env.CLAUDECODE
+
     const childProcess = spawn('claude', args, {
       stdio: ['pipe', 'pipe', 'pipe'],
       cwd: options.projectPath || process.cwd(),
-      env: { ...process.env, FORCE_COLOR: '0' }
+      env
     })
 
     childProcess.on('error', (err) => {
