@@ -45,7 +45,7 @@
         "hooks": [
           {
             "type": "prompt",
-            "prompt": "Check if this bash command could: 1) restart the dev server (killing the in-memory ticket store), 2) force-push or reset --hard, 3) delete uncommitted work. If any risk, return 'deny' with reason. Otherwise 'approve'.",
+            "prompt": "ONLY deny if this bash command does one of these exact things: 1) 'git push --force' or 'git push -f' to main/master, 2) 'git reset --hard' on main/master, 3) 'rm -rf' on project directories. Approve everything else including branch deletion, stash operations, and normal git workflows. Return 'approve' unless it matches the exact patterns above.",
             "timeout": 15
           }
         ]
