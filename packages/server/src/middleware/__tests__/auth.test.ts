@@ -8,9 +8,10 @@ vi.mock('../../config.js', () => ({
 
 import { loadSecrets } from '../../config.js'
 
-function createMocks(authHeader?: string) {
+function createMocks(authHeader?: string, path?: string) {
   const req = {
-    headers: authHeader ? { authorization: authHeader } : {}
+    headers: authHeader ? { authorization: authHeader } : {},
+    path: path ?? '/api/some-endpoint'
   } as unknown as Request
 
   const res = {
@@ -89,6 +90,45 @@ describe('authMiddleware', () => {
     })
 
     const { req, res, next } = createMocks('valid-token')
+    authMiddleware(req, res, next)
+
+    expect(next).not.toHaveBeenCalled()
+    expect(res.status).toHaveBeenCalledWith(401)
+  })
+
+  it('passes through /api/settings/auth when auth is enabled with no token', () => {
+    vi.mocked(loadSecrets).mockReturnValue({
+      providers: {},
+      auth: { enabled: true, tokens: [] }
+    })
+
+    const { req, res, next } = createMocks(undefined, '/api/settings/auth')
+    authMiddleware(req, res, next)
+
+    expect(next).toHaveBeenCalled()
+    expect(res.status).not.toHaveBeenCalled()
+  })
+
+  it('passes through /api/settings/auth when auth is enabled with valid tokens configured', () => {
+    vi.mocked(loadSecrets).mockReturnValue({
+      providers: {},
+      auth: { enabled: true, tokens: ['valid-token'] }
+    })
+
+    const { req, res, next } = createMocks(undefined, '/api/settings/auth')
+    authMiddleware(req, res, next)
+
+    expect(next).toHaveBeenCalled()
+    expect(res.status).not.toHaveBeenCalled()
+  })
+
+  it('still blocks non-exempted paths when auth is enabled', () => {
+    vi.mocked(loadSecrets).mockReturnValue({
+      providers: {},
+      auth: { enabled: true, tokens: ['valid-token'] }
+    })
+
+    const { req, res, next } = createMocks(undefined, '/api/tickets')
     authMiddleware(req, res, next)
 
     expect(next).not.toHaveBeenCalled()

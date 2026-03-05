@@ -1,6 +1,8 @@
 import type { Request, Response, NextFunction } from 'express'
 import { loadSecrets } from '../config.js'
 
+const EXEMPT_PATHS = ['/api/settings/auth']
+
 export function authMiddleware(
   req: Request,
   res: Response,
@@ -10,6 +12,12 @@ export function authMiddleware(
 
   // If auth is disabled, pass through
   if (!secrets.auth.enabled) {
+    next()
+    return
+  }
+
+  // Exempt paths are always accessible regardless of auth status
+  if (EXEMPT_PATHS.includes(req.path)) {
     next()
     return
   }
