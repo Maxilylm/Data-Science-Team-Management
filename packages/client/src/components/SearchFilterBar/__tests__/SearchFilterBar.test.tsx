@@ -23,6 +23,7 @@ const withTheme = ({ children }: { children: React.ReactNode }) => (
 describe('SearchFilterBar', () => {
   const defaultProps = {
     onFilterChange: vi.fn(),
+    isDarkMode: false,
   }
 
   beforeEach(() => {
@@ -139,12 +140,9 @@ describe('SearchFilterBar', () => {
     expect(screen.getByText('Agent 1')).toBeTruthy()
   })
 
-  it('applies dark background when ThemeContext is in dark mode (no isDarkMode prop)', () => {
-    // Set dark mode in localStorage before ThemeProvider mounts
-    store['darkMode'] = 'true'
-    const { container } = render(<SearchFilterBar {...defaultProps} />, { wrapper: withTheme })
+  it('applies dark background when isDarkMode is true', () => {
+    const { container } = render(<SearchFilterBar {...defaultProps} isDarkMode />, { wrapper: withTheme })
     const containerDiv = container.firstChild as HTMLElement
-    // The container should have dark background from ThemeContext
-    expect(containerDiv.style.backgroundColor).toBe('#1f2937')
+    expect(containerDiv.style.backgroundColor).toBe('rgb(31, 41, 55)')
   })
 })

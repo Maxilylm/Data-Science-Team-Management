@@ -18,6 +18,8 @@ import { LoginScreen } from './components/LoginScreen/LoginScreen'
 import { Settings } from './pages/Settings/Settings'
 import NeedsInputPanel from './components/NeedsInputPanel'
 import ConfirmDialog from './components/ConfirmDialog'
+import Toast from './components/Toast'
+import { useToast } from './hooks/useToast'
 import type { Agent, TicketPriority } from './types'
 
 interface FeedEvent {
@@ -71,9 +73,10 @@ const statBadgeStyle = (color: string): React.CSSProperties => ({
 })
 
 export default function App() {
+  const toast = useToast()
   const { agents, spawnAgent, stopAgent, sendInput, createAgent, deleteAgent } = useAgents()
   const { tasksNeedingInput, refetch: refetchTasks } = useTasks()
-  const { tickets, unassignedTickets, summary, createTicket, updateTicket, assignTicket, deleteTicket, answerTicket, refetch: refetchTickets } = useTickets()
+  const { tickets, unassignedTickets, summary, createTicket, updateTicket, assignTicket, deleteTicket, answerTicket, refetch: refetchTickets } = useTickets({ onError: toast.error })
   const { projects, activeProject, activeProjectId, activateProject, createProject, initializeProject, deleteProject, isActivating } = useProjects()
   const auth = useAuth()
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
@@ -348,6 +351,7 @@ export default function App() {
         onCancel={() => setDeleteAgentConfirm(null)}
         isDarkMode={isDarkMode}
       />
+      <Toast toasts={toast.toasts} onDismiss={toast.dismissToast} isDarkMode={isDarkMode} />
     </div>
   )
 }

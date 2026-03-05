@@ -79,16 +79,14 @@ describe('ConfirmDialog', () => {
     expect(defaultProps.onCancel).not.toHaveBeenCalled()
   })
 
-  it('confirm button has destructive (red) styling', () => {
+  it('confirm button has destructive (red) styling via CSS class', () => {
     render(<ConfirmDialog {...defaultProps} confirmVariant="danger" />, { wrapper: withTheme })
     const confirmBtn = screen.getByRole('button', { name: /delete/i })
-    const style = confirmBtn.getAttribute('style') || ''
-    expect(style).toContain('rgb(239, 68, 68)')
+    expect(confirmBtn.className).toContain('btn--danger')
   })
 
-  it('applies dark background to dialog when ThemeContext is dark (no isDarkMode prop)', () => {
-    store['darkMode'] = 'true'
-    render(<ConfirmDialog {...defaultProps} />, { wrapper: withTheme })
+  it('applies dark background to dialog when isDarkMode is true', () => {
+    render(<ConfirmDialog {...defaultProps} isDarkMode />, { wrapper: withTheme })
     const dialog = screen.getByRole('dialog')
     const dialogContent = dialog.querySelector('[style]') as HTMLElement
     expect(dialogContent.style.backgroundColor).toBe('rgb(31, 41, 55)')

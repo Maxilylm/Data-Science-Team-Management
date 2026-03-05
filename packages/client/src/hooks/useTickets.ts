@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../services/api'
 import type { Ticket, TicketPriority } from '../types'
 
-export function useTickets() {
+export function useTickets(options?: { onError?: (msg: string) => void }) {
   const queryClient = useQueryClient()
 
   const { data: tickets = [], isLoading, error, refetch } = useQuery({
@@ -26,6 +26,8 @@ export function useTickets() {
     completed: tickets.filter(t => t.status === 'completed').length
   }), [tickets, unassignedTickets])
 
+  const onMutationError = (err: Error) => options?.onError?.(err.message)
+
   const createTicketMutation = useMutation({
     mutationFn: (ticket: {
       title: string
@@ -34,40 +36,35 @@ export function useTickets() {
       priority?: TicketPriority
       tags?: string[]
     }) => api.createTicket(ticket),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tickets'] })
-    }
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tickets'] }),
+    onError: onMutationError
   })
 
   const updateTicketMutation = useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Partial<Ticket> }) =>
       api.updateTicket(id, updates),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tickets'] })
-    }
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tickets'] }),
+    onError: onMutationError
   })
 
   const assignTicketMutation = useMutation({
     mutationFn: ({ id, agentId }: { id: string; agentId: string | null }) =>
       api.assignTicket(id, agentId),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tickets'] })
-    }
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tickets'] }),
+    onError: onMutationError
   })
 
   const deleteTicketMutation = useMutation({
     mutationFn: (id: string) => api.deleteTicket(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tickets'] })
-    }
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tickets'] }),
+    onError: onMutationError
   })
 
   const answerTicketMutation = useMutation({
     mutationFn: ({ id, answer }: { id: string; answer: string }) =>
       api.answerTicketQuestion(id, answer),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tickets'] })
-    }
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tickets'] }),
+    onError: onMutationError
   })
 
   const getTicketsByAgent = (agentId: string): Ticket[] => {
