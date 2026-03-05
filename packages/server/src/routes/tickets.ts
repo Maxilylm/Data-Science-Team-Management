@@ -1,11 +1,10 @@
 import { Router, Request, Response } from 'express'
-import * as fs from 'fs'
-import * as path from 'path'
 import type { TicketService } from '../services/TicketService.js'
 import type { ProviderManager } from '../providers/ProviderManager.js'
 import type { AgentService } from '../services/AgentService.js'
 import type { TicketStatus, TicketPriority } from '../types/Agent.js'
 import { getConfig } from '../config.js'
+import { readAgentSystemPrompt } from './utils.js'
 
 export function createTicketsRouter(
   ticketService: TicketService,
@@ -260,16 +259,3 @@ Ticket ID: ${ticket.id}`
   return router
 }
 
-function readAgentSystemPrompt(agentId: string): string | undefined {
-  try {
-    const agentPath = path.join(
-      process.cwd(), '..', '..', '.claude', 'agents', `${agentId}.md`
-    )
-    if (fs.existsSync(agentPath)) {
-      return fs.readFileSync(agentPath, 'utf-8')
-    }
-  } catch {
-    // Ignore errors
-  }
-  return undefined
-}

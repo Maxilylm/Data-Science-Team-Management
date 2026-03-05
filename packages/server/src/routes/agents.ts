@@ -1,9 +1,8 @@
 import { Router, Request, Response } from 'express'
-import * as fs from 'fs'
-import * as path from 'path'
 import type { AgentService } from '../services/AgentService.js'
 import type { ProviderManager } from '../providers/ProviderManager.js'
 import { getConfig } from '../config.js'
+import { readAgentSystemPrompt } from './utils.js'
 
 export function createAgentsRouter(
   agentService: AgentService,
@@ -152,16 +151,3 @@ export function createAgentsRouter(
   return router
 }
 
-function readAgentSystemPrompt(agentId: string): string | undefined {
-  try {
-    const agentPath = path.join(
-      process.cwd(), '..', '..', '.claude', 'agents', `${agentId}.md`
-    )
-    if (fs.existsSync(agentPath)) {
-      return fs.readFileSync(agentPath, 'utf-8')
-    }
-  } catch {
-    // Ignore errors reading agent prompt
-  }
-  return undefined
-}
