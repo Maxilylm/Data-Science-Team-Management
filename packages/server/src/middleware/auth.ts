@@ -1,6 +1,7 @@
 import type { Request, Response, NextFunction } from 'express'
-import { loadSecrets } from '../config.js'
+import { getSecrets } from '../config.js'
 
+// Must match: settings router mount (/api/settings) + auth route (/auth)
 const EXEMPT_PATHS = ['/api/settings/auth']
 
 export function authMiddleware(
@@ -8,7 +9,7 @@ export function authMiddleware(
   res: Response,
   next: NextFunction
 ): void {
-  const secrets = loadSecrets()
+  const secrets = getSecrets()
 
   // If auth is disabled, pass through
   if (!secrets.auth.enabled) {

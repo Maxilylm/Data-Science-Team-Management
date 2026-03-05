@@ -151,12 +151,27 @@ export function saveSecrets(secrets: Partial<SecretsConfig>): SecretsConfig {
   fs.writeFileSync(SECRETS_PATH, JSON.stringify(updated, null, 2), {
     mode: 0o600
   })
+  secretsCache = updated
   return updated
 }
 
 export function maskApiKey(key: string): string {
   if (key.length <= 8) return '****'
   return '****' + key.slice(-4)
+}
+
+// Singleton secrets cache
+let secretsCache: SecretsConfig | null = null
+
+export function getSecrets(): SecretsConfig {
+  if (!secretsCache) {
+    secretsCache = loadSecrets()
+  }
+  return secretsCache
+}
+
+export function invalidateSecretsCache(): void {
+  secretsCache = null
 }
 
 // Singleton config instance

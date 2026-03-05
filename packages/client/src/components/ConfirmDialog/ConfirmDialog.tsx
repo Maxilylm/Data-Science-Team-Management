@@ -57,8 +57,8 @@ export default function ConfirmDialog({
   }, [isOpen])
 
   useEffect(() => {
+    if (!isOpen) return
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isOpen) return
       if (e.key === 'Escape') {
         onCancel()
       }

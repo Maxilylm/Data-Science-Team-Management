@@ -3,10 +3,10 @@ import type { Request, Response, NextFunction } from 'express'
 import { authMiddleware } from '../auth.js'
 
 vi.mock('../../config.js', () => ({
-  loadSecrets: vi.fn()
+  getSecrets: vi.fn()
 }))
 
-import { loadSecrets } from '../../config.js'
+import { getSecrets } from '../../config.js'
 
 function createMocks(authHeader?: string, path?: string) {
   const req = {
@@ -30,7 +30,7 @@ describe('authMiddleware', () => {
   })
 
   it('passes through when auth is disabled', () => {
-    vi.mocked(loadSecrets).mockReturnValue({
+    vi.mocked(getSecrets).mockReturnValue({
       providers: {},
       auth: { enabled: false, tokens: [] }
     })
@@ -43,7 +43,7 @@ describe('authMiddleware', () => {
   })
 
   it('returns 401 when auth is enabled and no token provided', () => {
-    vi.mocked(loadSecrets).mockReturnValue({
+    vi.mocked(getSecrets).mockReturnValue({
       providers: {},
       auth: { enabled: true, tokens: ['valid-token'] }
     })
@@ -57,7 +57,7 @@ describe('authMiddleware', () => {
   })
 
   it('returns 401 when auth is enabled and invalid token', () => {
-    vi.mocked(loadSecrets).mockReturnValue({
+    vi.mocked(getSecrets).mockReturnValue({
       providers: {},
       auth: { enabled: true, tokens: ['valid-token'] }
     })
@@ -71,7 +71,7 @@ describe('authMiddleware', () => {
   })
 
   it('passes through when auth is enabled and valid token', () => {
-    vi.mocked(loadSecrets).mockReturnValue({
+    vi.mocked(getSecrets).mockReturnValue({
       providers: {},
       auth: { enabled: true, tokens: ['valid-token'] }
     })
@@ -84,7 +84,7 @@ describe('authMiddleware', () => {
   })
 
   it('returns 401 when authorization header has no Bearer prefix', () => {
-    vi.mocked(loadSecrets).mockReturnValue({
+    vi.mocked(getSecrets).mockReturnValue({
       providers: {},
       auth: { enabled: true, tokens: ['valid-token'] }
     })
@@ -97,7 +97,7 @@ describe('authMiddleware', () => {
   })
 
   it('passes through /api/settings/auth when auth is enabled with no token', () => {
-    vi.mocked(loadSecrets).mockReturnValue({
+    vi.mocked(getSecrets).mockReturnValue({
       providers: {},
       auth: { enabled: true, tokens: [] }
     })
@@ -110,7 +110,7 @@ describe('authMiddleware', () => {
   })
 
   it('passes through /api/settings/auth when auth is enabled with valid tokens configured', () => {
-    vi.mocked(loadSecrets).mockReturnValue({
+    vi.mocked(getSecrets).mockReturnValue({
       providers: {},
       auth: { enabled: true, tokens: ['valid-token'] }
     })
@@ -123,7 +123,7 @@ describe('authMiddleware', () => {
   })
 
   it('still blocks non-exempted paths when auth is enabled', () => {
-    vi.mocked(loadSecrets).mockReturnValue({
+    vi.mocked(getSecrets).mockReturnValue({
       providers: {},
       auth: { enabled: true, tokens: ['valid-token'] }
     })
