@@ -78,10 +78,14 @@ export class ClaudeRunner extends EventEmitter {
     // Use -p for the prompt (runs in non-interactive mode)
     args.push('-p', options.prompt)
 
+    const env = { ...process.env, FORCE_COLOR: '0' }  // Disable colors for cleaner output
+    // Remove CLAUDECODE env var to prevent "nested session" error
+    delete env.CLAUDECODE
+
     const childProcess = spawn('claude', args, {
       stdio: ['pipe', 'pipe', 'pipe'],
       cwd: options.projectPath || process.cwd(),
-      env: { ...process.env, FORCE_COLOR: '0' }  // Disable colors for cleaner output
+      env
     })
 
     childProcess.on('error', (err) => {

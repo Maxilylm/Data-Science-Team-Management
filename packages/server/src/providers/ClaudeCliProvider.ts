@@ -43,10 +43,14 @@ export class ClaudeCliProvider extends EventEmitter implements AgentProvider {
 
     const args = this.buildArgs(options)
 
+    const env = { ...process.env, FORCE_COLOR: '0' }
+    // Remove CLAUDECODE env var to prevent "nested session" error
+    delete env.CLAUDECODE
+
     const childProcess = spawn('claude', args, {
       stdio: ['pipe', 'pipe', 'pipe'],
       cwd: options.projectPath || process.cwd(),
-      env: { ...process.env, FORCE_COLOR: '0' }
+      env
     })
 
     childProcess.on('error', (err) => {
@@ -120,6 +124,10 @@ export class ClaudeCliProvider extends EventEmitter implements AgentProvider {
 
     if (options.resumeSessionId) {
       args.push('--resume', options.resumeSessionId)
+    } else if (options.systemPrompt) {
+      // Use --system-prompt so the agent works in any project directory
+      // (--agent looks for .claude/agents/<id>.md in the cwd which may not exist)
+      args.push('--system-prompt', options.systemPrompt)
     } else if (options.agentId) {
       args.push('--agent', options.agentId)
     }

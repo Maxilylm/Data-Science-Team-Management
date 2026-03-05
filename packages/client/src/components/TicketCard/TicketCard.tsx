@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Ticket } from '../../types'
+import { priorityColors, statusColors } from '../../constants/ticketColors'
 
 interface TicketCardProps {
   ticket: Ticket
@@ -11,20 +12,6 @@ interface TicketCardProps {
   isDarkMode?: boolean
 }
 
-const priorityColors: Record<Ticket['priority'], string> = {
-  low: '#6b7280',
-  medium: '#3b82f6',
-  high: '#f59e0b',
-  urgent: '#ef4444'
-}
-
-const statusColors: Record<Ticket['status'], { bg: string; text: string }> = {
-  unassigned: { bg: '#f3f4f6', text: '#6b7280' },
-  pending: { bg: '#fef3c7', text: '#92400e' },
-  in_progress: { bg: '#dbeafe', text: '#1e40af' },
-  needs_help: { bg: '#fee2e2', text: '#991b1b' },
-  completed: { bg: '#d1fae5', text: '#065f46' }
-}
 
 const getCardStyle = (isDark: boolean): React.CSSProperties => ({
   backgroundColor: isDark ? '#374151' : 'white',

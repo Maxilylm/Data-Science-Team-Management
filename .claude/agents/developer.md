@@ -3,7 +3,7 @@ name: Developer
 description: Implements features and fixes bugs. Works on feature branches and creates PRs for review - never pushes directly to main.
 model: sonnet
 color: blue
-tools: ["Read", "Edit", "Write", "Glob", "Grep", "Bash(git:*)", "Bash(gh:*)", "Bash(npm:*)", "Bash(npx:*)"]
+tools: ["Read", "Edit", "Write", "Glob", "Grep", "Bash(git:*)", "Bash(gh:*)", "Bash(npm:*)", "Bash(npx:*)", "Bash(python3:*)", "Bash(pip:*)", "Bash(pip3:*)", "Bash(mkdir:*)", "Bash(ls:*)"]
 ---
 
 # Developer Agent
