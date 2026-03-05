@@ -26,16 +26,6 @@ const getDialogStyle = (isDark: boolean): React.CSSProperties => ({
   color: isDark ? '#e5e7eb' : 'inherit'
 })
 
-const buttonBaseStyle: React.CSSProperties = {
-  padding: '10px 20px',
-  border: 'none',
-  borderRadius: '6px',
-  cursor: 'pointer',
-  fontSize: '14px',
-  fontWeight: 500,
-  transition: 'background-color 0.2s, transform 0.1s'
-}
-
 export default function ConfirmDialog({
   isOpen,
   title,
@@ -69,18 +59,7 @@ export default function ConfirmDialog({
 
   if (!isOpen) return null
 
-  const confirmButtonStyle: React.CSSProperties = {
-    ...buttonBaseStyle,
-    backgroundColor: confirmVariant === 'danger' ? '#ef4444' : '#3b82f6',
-    color: 'white'
-  }
-
-  const cancelButtonStyle: React.CSSProperties = {
-    ...buttonBaseStyle,
-    backgroundColor: isDarkMode ? '#374151' : '#f3f4f6',
-    color: isDarkMode ? '#e5e7eb' : '#374151',
-    border: isDarkMode ? '1px solid #4b5563' : '1px solid #d1d5db'
-  }
+  const confirmClass = confirmVariant === 'danger' ? 'btn btn--danger' : 'btn btn--primary'
 
   return (
     <div
@@ -116,28 +95,14 @@ export default function ConfirmDialog({
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
           <button
             onClick={onCancel}
-            style={cancelButtonStyle}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = isDarkMode ? '#4b5563' : '#e5e7eb'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = isDarkMode ? '#374151' : '#f3f4f6'
-            }}
+            className="btn btn--secondary"
           >
             {cancelLabel}
           </button>
           <button
             ref={confirmButtonRef}
             onClick={onConfirm}
-            style={confirmButtonStyle}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = confirmVariant === 'danger' ? '#dc2626' : '#2563eb'
-              e.currentTarget.style.transform = 'scale(1.02)'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = confirmVariant === 'danger' ? '#ef4444' : '#3b82f6'
-              e.currentTarget.style.transform = 'scale(1)'
-            }}
+            className={confirmClass}
           >
             {confirmLabel}
           </button>

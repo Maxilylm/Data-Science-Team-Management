@@ -5,15 +5,6 @@ interface TaskCardProps {
   onClick?: () => void
 }
 
-const cardStyle: React.CSSProperties = {
-  backgroundColor: 'white',
-  borderRadius: '6px',
-  padding: '12px',
-  boxShadow: '0 1px 3px rgba(0,0,0,0.12)',
-  cursor: 'pointer',
-  transition: 'box-shadow 0.2s'
-}
-
 const subjectStyle: React.CSSProperties = {
   fontWeight: 500,
   marginBottom: '8px',
@@ -39,14 +30,8 @@ const inputRequestStyle: React.CSSProperties = {
 export default function TaskCard({ task, onClick }: TaskCardProps) {
   return (
     <div
-      style={cardStyle}
+      className="card card--interactive"
       onClick={onClick}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = '0 2px 6px rgba(0,0,0,0.15)'
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.12)'
-      }}
     >
       <div style={subjectStyle}>{task.subject}</div>
       <div style={metaStyle}>

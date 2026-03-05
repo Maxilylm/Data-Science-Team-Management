@@ -48,16 +48,11 @@ const getLabelStyle = (isDark: boolean): React.CSSProperties => ({
   color: isDark ? '#d1d5db' : '#374151'
 })
 
-const priorityButtonStyle = (selected: boolean, color: string, isHovered: boolean = false, isDark: boolean = false): React.CSSProperties => ({
-  padding: '8px 16px',
+const priorityButtonStyle = (selected: boolean, color: string, isDark: boolean = false): React.CSSProperties => ({
   border: `2px solid ${selected ? color : (isDark ? '#4b5563' : '#e5e7eb')}`,
-  borderRadius: '6px',
-  backgroundColor: selected ? color + '20' : (isHovered ? (isDark ? '#374151' : '#f9fafb') : (isDark ? '#1f2937' : 'white')),
+  backgroundColor: selected ? color + '20' : (isDark ? '#1f2937' : 'white'),
   color: selected ? color : (isDark ? '#9ca3af' : '#6b7280'),
-  cursor: 'pointer',
-  fontWeight: 500,
   fontSize: '13px',
-  transition: 'all 0.2s ease'
 })
 
 
@@ -66,7 +61,6 @@ export default function CreateTicketDialog({ isOpen, onSubmit, onClose, isDarkMo
   const [description, setDescription] = useState('')
   const [priority, setPriority] = useState<TicketPriority>('medium')
   const [tagsInput, setTagsInput] = useState('')
-  const [hoveredPriority, setHoveredPriority] = useState<TicketPriority | null>(null)
 
   if (!isOpen) return null
 
@@ -132,17 +126,8 @@ export default function CreateTicketDialog({ isOpen, onSubmit, onClose, isDarkMo
                   key={p}
                   type="button"
                   onClick={() => setPriority(p)}
-                  style={priorityButtonStyle(priority === p, priorityColors[p], hoveredPriority === p, isDarkMode)}
-                  onMouseEnter={(e) => {
-                    setHoveredPriority(p);
-                    e.currentTarget.style.transform = 'scale(1.02)';
-                    e.currentTarget.style.boxShadow = isDarkMode ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    setHoveredPriority(null);
-                    e.currentTarget.style.transform = 'scale(1)';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}
+                  className="btn btn--sm"
+                  style={priorityButtonStyle(priority === p, priorityColors[p], isDarkMode)}
                 >
                   {p.charAt(0).toUpperCase() + p.slice(1)}
                 </button>
@@ -165,58 +150,14 @@ export default function CreateTicketDialog({ isOpen, onSubmit, onClose, isDarkMo
             <button
               type="button"
               onClick={onClose}
-              style={{
-                padding: '10px 20px',
-                border: isDarkMode ? '1px solid #4b5563' : '1px solid #d1d5db',
-                borderRadius: '6px',
-                backgroundColor: isDarkMode ? '#374151' : 'white',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight: 500,
-                transition: 'all 0.2s ease',
-                color: isDarkMode ? '#e5e7eb' : 'inherit'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = isDarkMode ? '#4b5563' : '#f9fafb';
-                e.currentTarget.style.transform = 'scale(1.02)';
-                e.currentTarget.style.boxShadow = isDarkMode ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.15)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = isDarkMode ? '#374151' : 'white';
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
+              className="btn btn--secondary"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!title.trim()}
-              style={{
-                padding: '10px 20px',
-                border: 'none',
-                borderRadius: '6px',
-                backgroundColor: title.trim() ? '#10b981' : '#9ca3af',
-                color: 'white',
-                cursor: title.trim() ? 'pointer' : 'not-allowed',
-                fontSize: '14px',
-                fontWeight: 500,
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                if (title.trim()) {
-                  e.currentTarget.style.backgroundColor = '#059669';
-                  e.currentTarget.style.transform = 'scale(1.02)';
-                  e.currentTarget.style.boxShadow = isDarkMode ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.15)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (title.trim()) {
-                  e.currentTarget.style.backgroundColor = '#10b981';
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }
-              }}
+              className="btn btn--success"
             >
               Create Ticket
             </button>
