@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import type { TicketPriority } from '../../types'
+import { priorityColors } from '../../constants/ticketColors'
+import { overlayStyle } from '../../constants/dialogStyles'
 
 interface CreateTicketDialogProps {
   isOpen: boolean
@@ -13,18 +15,6 @@ interface CreateTicketDialogProps {
   isDarkMode?: boolean
 }
 
-const overlayStyle: React.CSSProperties = {
-  position: 'fixed',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: 'rgba(0,0,0,0.5)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 1000
-}
 
 const getDialogStyle = (isDark: boolean): React.CSSProperties => ({
   backgroundColor: isDark ? '#1f2937' : 'white',
@@ -70,12 +60,6 @@ const priorityButtonStyle = (selected: boolean, color: string, isHovered: boolea
   transition: 'all 0.2s ease'
 })
 
-const priorityColors: Record<TicketPriority, string> = {
-  low: '#6b7280',
-  medium: '#3b82f6',
-  high: '#f59e0b',
-  urgent: '#ef4444'
-}
 
 export default function CreateTicketDialog({ isOpen, onSubmit, onClose, isDarkMode = false }: CreateTicketDialogProps) {
   const [title, setTitle] = useState('')

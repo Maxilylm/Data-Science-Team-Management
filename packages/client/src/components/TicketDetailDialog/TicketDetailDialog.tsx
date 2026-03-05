@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import type { Ticket, TicketPriority, TicketStatus } from '../../types'
+import { priorityColors, statusColors } from '../../constants/ticketColors'
+import { overlayStyle } from '../../constants/dialogStyles'
 
 interface TicketDetailDialogProps {
   ticket: Ticket | null
@@ -10,18 +12,6 @@ interface TicketDetailDialogProps {
   isDarkMode?: boolean
 }
 
-const overlayStyle: React.CSSProperties = {
-  position: 'fixed',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: 'rgba(0,0,0,0.5)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 1000
-}
 
 const getDialogStyle = (isDark: boolean): React.CSSProperties => ({
   backgroundColor: isDark ? '#1f2937' : 'white',
@@ -55,20 +45,6 @@ const getLabelStyle = (isDark: boolean): React.CSSProperties => ({
   color: isDark ? '#d1d5db' : '#374151'
 })
 
-const priorityColors: Record<TicketPriority, string> = {
-  low: '#6b7280',
-  medium: '#3b82f6',
-  high: '#f59e0b',
-  urgent: '#ef4444'
-}
-
-const statusColors: Record<TicketStatus, { bg: string; text: string }> = {
-  unassigned: { bg: '#f3f4f6', text: '#6b7280' },
-  pending: { bg: '#fef3c7', text: '#92400e' },
-  in_progress: { bg: '#dbeafe', text: '#1e40af' },
-  needs_help: { bg: '#fee2e2', text: '#991b1b' },
-  completed: { bg: '#d1fae5', text: '#065f46' }
-}
 
 const priorityButtonStyle = (selected: boolean, color: string, isHovered: boolean = false, isDark: boolean = false): React.CSSProperties => ({
   padding: '6px 12px',
