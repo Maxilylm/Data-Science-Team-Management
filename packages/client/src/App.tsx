@@ -232,7 +232,7 @@ export default function App() {
               isDarkMode={isDarkMode}
             />
           </div>
-          <div style={statsStyle}>
+          <div style={statsStyle} role="status" aria-live="polite" aria-label="Dashboard statistics">
             <div style={statBadgeStyle('#10b981')}>
               <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981' }} />
               {activeAgentsCount} active
@@ -263,22 +263,12 @@ export default function App() {
               Settings
             </button>
             <button
+              className="btn btn--ghost btn--sm"
               onClick={toggleDarkMode}
-              style={{
-                background: 'none',
-                border: 'none',
-                fontSize: '20px',
-                cursor: 'pointer',
-                padding: '4px 8px',
-                borderRadius: '6px',
-                transition: 'background-color 0.2s',
-                backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}
-              title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              style={{ fontSize: '20px' }}
+              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             >
-              {isDarkMode ? 'L' : 'D'}
+              {isDarkMode ? '\u2600' : '\u263D'}
             </button>
           </div>
         </header>
