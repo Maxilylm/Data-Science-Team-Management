@@ -21,10 +21,10 @@ if [ -n "$LOG_FILES" ]; then
   fi
 fi
 
-# Check for uncommitted work on current branch
-DIRTY=$(cd "$PROJECT_DIR" && git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
-if [ "$DIRTY" -gt 5 ]; then
-  ISSUES="${ISSUES}\n- ${DIRTY} uncommitted changes - consider committing before stopping"
+# Check for staged or modified tracked files (ignore untracked)
+DIRTY=$(cd "$PROJECT_DIR" && git status --porcelain 2>/dev/null | grep -v '^??' | wc -l | tr -d ' ')
+if [ "$DIRTY" -gt 0 ]; then
+  ISSUES="${ISSUES}\n- ${DIRTY} uncommitted tracked changes - consider committing before stopping"
 fi
 
 if [ -n "$ISSUES" ]; then
