@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { Ticket, TicketPriority, TicketStatus } from '../../types'
 import { priorityColors, statusColors } from '../../constants/ticketColors'
 import { overlayStyle } from '../../constants/dialogStyles'
+import ConfirmDialog from '../ConfirmDialog'
 
 interface TicketDetailDialogProps {
   ticket: Ticket | null
@@ -83,6 +84,7 @@ export default function TicketDetailDialog({ ticket, isOpen, onClose, onUpdate, 
   const [editedTagsInput, setEditedTagsInput] = useState('')
   const [hoveredPriority, setHoveredPriority] = useState<TicketPriority | null>(null)
   const [hoveredStatus, setHoveredStatus] = useState<TicketStatus | null>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   if (!isOpen || !ticket) return null
 
@@ -119,7 +121,12 @@ export default function TicketDetailDialog({ ticket, isOpen, onClose, onUpdate, 
   }
 
   const handleDelete = () => {
-    if (onDelete && confirm('Are you sure you want to delete this ticket?')) {
+    setShowDeleteConfirm(true)
+  }
+
+  const handleConfirmDelete = () => {
+    setShowDeleteConfirm(false)
+    if (onDelete) {
       onDelete(ticket.id)
       onClose()
     }
@@ -494,6 +501,17 @@ export default function TicketDetailDialog({ ticket, isOpen, onClose, onUpdate, 
           </div>
         </div>
       </div>
+      <ConfirmDialog
+        isOpen={showDeleteConfirm}
+        title="Delete Ticket"
+        message="Are you sure you want to delete this ticket? This action cannot be undone."
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        confirmVariant="danger"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+        isDarkMode={isDarkMode}
+      />
     </div>
   )
 }

@@ -17,6 +17,7 @@ import { ProjectManager } from './components/ProjectManager/ProjectManager'
 import { LoginScreen } from './components/LoginScreen/LoginScreen'
 import { Settings } from './pages/Settings/Settings'
 import NeedsInputPanel from './components/NeedsInputPanel'
+import ConfirmDialog from './components/ConfirmDialog'
 import type { Agent, TicketPriority } from './types'
 
 interface FeedEvent {
@@ -85,6 +86,7 @@ export default function App() {
     const stored = localStorage.getItem('darkMode')
     return stored ? JSON.parse(stored) : false
   })
+  const [deleteAgentConfirm, setDeleteAgentConfirm] = useState<string | null>(null)
 
   useEffect(() => {
     localStorage.setItem('darkMode', JSON.stringify(isDarkMode))
@@ -135,8 +137,13 @@ export default function App() {
   }
 
   const handleDeleteAgent = (agentId: string) => {
-    if (confirm(`Delete agent "${agentId}"? This will remove the agent configuration file.`)) {
-      deleteAgent(agentId)
+    setDeleteAgentConfirm(agentId)
+  }
+
+  const handleConfirmDeleteAgent = () => {
+    if (deleteAgentConfirm) {
+      deleteAgent(deleteAgentConfirm)
+      setDeleteAgentConfirm(null)
     }
   }
 
@@ -338,6 +345,17 @@ export default function App() {
         onCreateNew={initializeProject}
         onRemove={deleteProject}
         onActivate={activateProject}
+        isDarkMode={isDarkMode}
+      />
+      <ConfirmDialog
+        isOpen={deleteAgentConfirm !== null}
+        title="Delete Agent"
+        message={`Delete agent "${deleteAgentConfirm}"? This will remove the agent configuration file.`}
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        confirmVariant="danger"
+        onConfirm={handleConfirmDeleteAgent}
+        onCancel={() => setDeleteAgentConfirm(null)}
         isDarkMode={isDarkMode}
       />
     </div>
