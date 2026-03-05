@@ -4,7 +4,7 @@ import type { ProviderManager } from '../providers/ProviderManager.js'
 import type { AgentService } from '../services/AgentService.js'
 import type { TicketStatus, TicketPriority } from '../types/Agent.js'
 import { getConfig } from '../config.js'
-import { readAgentSystemPrompt } from './utils.js'
+import { readAgentSystemPrompt, isValidTicketStatus, isValidTicketPriority } from './utils.js'
 
 export function createTicketsRouter(
   ticketService: TicketService,
@@ -50,6 +50,11 @@ export function createTicketsRouter(
       return
     }
 
+    if (priority && !isValidTicketPriority(priority)) {
+      res.status(400).json({ error: `Invalid priority. Must be one of: low, medium, high, urgent` })
+      return
+    }
+
     const ticket = ticketService.createTicket({
       title,
       description,
@@ -66,11 +71,20 @@ export function createTicketsRouter(
   router.patch('/:id', (req: Request, res: Response) => {
     const { title, description, status, priority, assignedTo, tags } = req.body
 
+    if (status !== undefined && !isValidTicketStatus(status)) {
+      res.status(400).json({ error: 'Invalid status. Must be one of: unassigned, pending, in_progress, needs_help, completed' })
+      return
+    }
+    if (priority !== undefined && !isValidTicketPriority(priority)) {
+      res.status(400).json({ error: 'Invalid priority. Must be one of: low, medium, high, urgent' })
+      return
+    }
+
     const updates: Record<string, unknown> = {}
     if (title !== undefined) updates.title = title
     if (description !== undefined) updates.description = description
-    if (status !== undefined) updates.status = status as TicketStatus
-    if (priority !== undefined) updates.priority = priority as TicketPriority
+    if (status !== undefined) updates.status = status
+    if (priority !== undefined) updates.priority = priority
     if (assignedTo !== undefined) updates.assignedTo = assignedTo
     if (tags !== undefined) updates.tags = tags
 

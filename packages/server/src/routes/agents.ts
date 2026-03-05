@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express'
 import type { AgentService } from '../services/AgentService.js'
 import type { ProviderManager } from '../providers/ProviderManager.js'
 import { getConfig } from '../config.js'
-import { readAgentSystemPrompt } from './utils.js'
+import { readAgentSystemPrompt, isValidModel } from './utils.js'
 
 export function createAgentsRouter(
   agentService: AgentService,
@@ -21,6 +21,11 @@ export function createAgentsRouter(
 
     if (!id || !name || !description) {
       res.status(400).json({ error: 'id, name, and description are required' })
+      return
+    }
+
+    if (model && !isValidModel(model)) {
+      res.status(400).json({ error: 'Invalid model. Must be one of: sonnet, opus, haiku' })
       return
     }
 
