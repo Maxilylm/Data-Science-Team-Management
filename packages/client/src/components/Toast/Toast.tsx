@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning'
 
@@ -45,6 +45,8 @@ function ToastItem({
   const [isExiting, setIsExiting] = useState(false)
   const config = typeConfig[toast.type]
   const duration = toast.duration ?? 4000
+  const onDismissRef = useRef(onDismiss)
+  onDismissRef.current = onDismiss
 
   useEffect(() => {
     const exitTimer = setTimeout(() => {
@@ -52,14 +54,14 @@ function ToastItem({
     }, duration - 300)
 
     const dismissTimer = setTimeout(() => {
-      onDismiss()
+      onDismissRef.current()
     }, duration)
 
     return () => {
       clearTimeout(exitTimer)
       clearTimeout(dismissTimer)
     }
-  }, [duration, onDismiss])
+  }, [duration])
 
   const toastStyle: React.CSSProperties = {
     display: 'flex',

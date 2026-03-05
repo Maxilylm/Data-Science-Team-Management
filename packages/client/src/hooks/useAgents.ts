@@ -1,8 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../services/api'
 
-export function useAgents() {
+export function useAgents(options?: { onError?: (msg: string) => void }) {
   const queryClient = useQueryClient()
+  const onMutationError = (err: Error) => options?.onError?.(err.message)
 
   const { data: agents = [], isLoading, error } = useQuery({
     queryKey: ['agents'],
@@ -15,33 +16,38 @@ export function useAgents() {
       api.spawnAgent(agentId, prompt, { resume }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agents'] })
-    }
+    },
+    onError: onMutationError
   })
 
   const stopMutation = useMutation({
     mutationFn: api.stopAgent,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agents'] })
-    }
+    },
+    onError: onMutationError
   })
 
   const sendInputMutation = useMutation({
     mutationFn: ({ agentId, input }: { agentId: string; input: string }) =>
-      api.sendInput(agentId, input)
+      api.sendInput(agentId, input),
+    onError: onMutationError
   })
 
   const createMutation = useMutation({
     mutationFn: api.createAgent,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agents'] })
-    }
+    },
+    onError: onMutationError
   })
 
   const deleteMutation = useMutation({
     mutationFn: api.deleteAgent,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['agents'] })
-    }
+    },
+    onError: onMutationError
   })
 
   return {

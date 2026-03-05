@@ -114,25 +114,25 @@ export default function TicketBoard({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <div style={ticketFilterStyle}>
           <button
-            className={filter === 'all' ? 'btn btn--primary btn--sm' : 'btn btn--sm'}
+            className={filter === 'all' ? 'btn btn--primary btn--sm' : 'btn btn--secondary btn--sm'}
             onClick={() => setFilter('all')}
           >
             All
           </button>
           <button
-            className={filter === 'active' ? 'btn btn--primary btn--sm' : 'btn btn--sm'}
+            className={filter === 'active' ? 'btn btn--primary btn--sm' : 'btn btn--secondary btn--sm'}
             onClick={() => setFilter('active')}
           >
             Active
           </button>
           <button
-            className={filter === 'needs_help' ? 'btn btn--primary btn--sm' : 'btn btn--sm'}
+            className={filter === 'needs_help' ? 'btn btn--primary btn--sm' : 'btn btn--secondary btn--sm'}
             onClick={() => setFilter('needs_help')}
           >
             Needs Help
           </button>
           <button
-            className={filter === 'completed' ? 'btn btn--primary btn--sm' : 'btn btn--sm'}
+            className={filter === 'completed' ? 'btn btn--primary btn--sm' : 'btn btn--secondary btn--sm'}
             onClick={() => setFilter('completed')}
           >
             Completed

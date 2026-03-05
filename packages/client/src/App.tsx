@@ -74,10 +74,10 @@ const statBadgeStyle = (color: string): React.CSSProperties => ({
 
 export default function App() {
   const toast = useToast()
-  const { agents, spawnAgent, stopAgent, sendInput, createAgent, deleteAgent } = useAgents()
+  const { agents, spawnAgent, stopAgent, sendInput, createAgent, deleteAgent } = useAgents({ onError: toast.error })
   const { tasksNeedingInput, refetch: refetchTasks } = useTasks()
   const { tickets, unassignedTickets, summary, createTicket, updateTicket, assignTicket, deleteTicket, answerTicket, refetch: refetchTickets } = useTickets({ onError: toast.error })
-  const { projects, activeProject, activeProjectId, activateProject, createProject, initializeProject, deleteProject, isActivating } = useProjects()
+  const { projects, activeProject, activeProjectId, activateProject, createProject, initializeProject, deleteProject, isActivating } = useProjects({ onError: toast.error })
   const auth = useAuth()
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
   const [feedEvents, setFeedEvents] = useState<FeedEvent[]>([])

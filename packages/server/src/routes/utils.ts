@@ -19,10 +19,20 @@ export function isValidModel(value: unknown): value is ModelType {
 }
 
 export function readAgentSystemPrompt(agentId: string): string | undefined {
+  // Guard against path traversal: only allow alphanumeric, hyphens, underscores
+  if (!/^[a-zA-Z0-9_-]+$/.test(agentId)) {
+    return undefined
+  }
+
   try {
-    const agentPath = path.join(
-      process.cwd(), '..', '..', '.claude', 'agents', `${agentId}.md`
-    )
+    const agentsDir = path.resolve(process.cwd(), '..', '..', '.claude', 'agents')
+    const agentPath = path.join(agentsDir, `${agentId}.md`)
+
+    // Ensure resolved path stays within agents directory
+    if (!path.resolve(agentPath).startsWith(agentsDir + path.sep)) {
+      return undefined
+    }
+
     if (fs.existsSync(agentPath)) {
       return fs.readFileSync(agentPath, 'utf-8')
     }
