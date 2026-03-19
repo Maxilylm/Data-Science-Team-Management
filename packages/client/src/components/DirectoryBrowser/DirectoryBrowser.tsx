@@ -39,7 +39,6 @@ export function DirectoryBrowser({ onSelect, onCancel, isDarkMode }: DirectoryBr
   const bg = isDarkMode ? '#1f2937' : '#ffffff'
   const text = isDarkMode ? '#e5e7eb' : '#1f2937'
   const border = isDarkMode ? '#4b5563' : '#d1d5db'
-  const hoverBg = isDarkMode ? '#374151' : '#f3f4f6'
 
   return (
     <div style={{ border: `1px solid ${border}`, borderRadius: '8px', overflow: 'hidden' }}>
@@ -91,21 +90,13 @@ export function DirectoryBrowser({ onSelect, onCancel, isDarkMode }: DirectoryBr
           <button
             key={entry.path}
             onClick={() => browse(entry.path)}
+            className="btn btn--ghost btn--sm"
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
               width: '100%',
-              padding: '6px 12px',
-              border: 'none',
-              backgroundColor: 'transparent',
-              cursor: 'pointer',
+              justifyContent: 'flex-start',
               color: text,
-              fontSize: '13px',
-              textAlign: 'left'
+              fontSize: '13px'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = hoverBg}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
           >
             <span style={{ opacity: 0.5 }}>📁</span>
             {entry.name}

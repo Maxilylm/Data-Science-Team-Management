@@ -107,25 +107,7 @@ export default function PromptDialog({ agent, onSubmit, onClose, isDarkMode = fa
         <div style={buttonRowStyle}>
           <button
             onClick={onClose}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: isDarkMode ? '#4b5563' : '#f3f4f6',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              color: isDarkMode ? '#e5e7eb' : 'inherit'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = isDarkMode ? '#6b7280' : '#e5e7eb';
-              e.currentTarget.style.transform = 'scale(1.02)';
-              e.currentTarget.style.boxShadow = isDarkMode ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.15)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = isDarkMode ? '#4b5563' : '#f3f4f6';
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
+            className="btn btn--secondary"
           >
             Cancel
           </button>
@@ -133,29 +115,7 @@ export default function PromptDialog({ agent, onSubmit, onClose, isDarkMode = fa
             <button
               onClick={() => handleSubmit(true)}
               disabled={!prompt.trim()}
-              style={{
-                padding: '8px 16px',
-                backgroundColor: prompt.trim() ? '#10b981' : '#9ca3af',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: prompt.trim() ? 'pointer' : 'not-allowed',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                if (prompt.trim()) {
-                  e.currentTarget.style.backgroundColor = '#059669';
-                  e.currentTarget.style.transform = 'scale(1.02)';
-                  e.currentTarget.style.boxShadow = isDarkMode ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.15)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (prompt.trim()) {
-                  e.currentTarget.style.backgroundColor = '#10b981';
-                  e.currentTarget.style.transform = 'scale(1)';
-                  e.currentTarget.style.boxShadow = 'none';
-                }
-              }}
+              className="btn btn--success"
             >
               Resume Session
             </button>
@@ -163,29 +123,7 @@ export default function PromptDialog({ agent, onSubmit, onClose, isDarkMode = fa
           <button
             onClick={() => handleSubmit(false)}
             disabled={!prompt.trim()}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: prompt.trim() ? '#3b82f6' : '#9ca3af',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: prompt.trim() ? 'pointer' : 'not-allowed',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => {
-              if (prompt.trim()) {
-                e.currentTarget.style.backgroundColor = '#2563eb';
-                e.currentTarget.style.transform = 'scale(1.02)';
-                e.currentTarget.style.boxShadow = isDarkMode ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.15)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (prompt.trim()) {
-                e.currentTarget.style.backgroundColor = '#3b82f6';
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = 'none';
-              }
-            }}
+            className="btn btn--primary"
           >
             {canResume ? 'New Session' : 'Start Task'}
           </button>

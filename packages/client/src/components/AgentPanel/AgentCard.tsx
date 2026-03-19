@@ -74,26 +74,11 @@ export default function AgentCard({ agent, onSpawn, onStop, onDelete, isDarkMode
           <button
             onClick={(e) => { e.stopPropagation(); onDelete(); }}
             title="Delete agent"
+            className="btn btn--ghost btn--sm"
             style={{
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
               color: '#ef4444',
-              padding: '4px',
               display: 'flex',
-              alignItems: 'center',
-              borderRadius: '4px',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = isDarkMode ? '#7f1d1d' : '#fee2e2';
-              e.currentTarget.style.transform = 'scale(1.02)';
-              e.currentTarget.style.boxShadow = isDarkMode ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.15)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'transparent';
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.boxShadow = 'none';
+              alignItems: 'center'
             }}
           >
             <TrashIcon />
@@ -132,52 +117,16 @@ export default function AgentCard({ agent, onSpawn, onStop, onDelete, isDarkMode
       <div style={{ display: 'flex', gap: '8px' }}>
         <button
           onClick={onSpawn}
-          style={{
-            padding: '6px 12px',
-            backgroundColor: '#3b82f6',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '13px',
-            transition: 'all 0.2s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#2563eb';
-            e.currentTarget.style.transform = 'scale(1.02)';
-            e.currentTarget.style.boxShadow = isDarkMode ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.15)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = '#3b82f6';
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
+          className="btn btn--primary"
+          style={{ fontSize: '13px' }}
         >
           {isRunning ? '+ New Instance' : 'Spawn'}
         </button>
         {isRunning && (
           <button
             onClick={onStop}
-            style={{
-              padding: '6px 12px',
-              backgroundColor: '#ef4444',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '13px',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#dc2626';
-              e.currentTarget.style.transform = 'scale(1.02)';
-              e.currentTarget.style.boxShadow = isDarkMode ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.15)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#ef4444';
-              e.currentTarget.style.transform = 'scale(1)';
-              e.currentTarget.style.boxShadow = 'none';
-            }}
+            className="btn btn--danger"
+            style={{ fontSize: '13px' }}
           >
             Stop All
           </button>

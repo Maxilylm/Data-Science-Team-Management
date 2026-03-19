@@ -60,17 +60,6 @@ const ticketFilterStyle: React.CSSProperties = {
   marginBottom: '12px'
 }
 
-const filterButtonStyle = (active: boolean): React.CSSProperties => ({
-  fontSize: '11px',
-  padding: '4px 8px',
-  border: 'none',
-  borderRadius: '4px',
-  cursor: 'pointer',
-  backgroundColor: active ? '#3b82f6' : '#f3f4f6',
-  color: active ? 'white' : '#6b7280',
-  transition: 'all 0.2s ease'
-})
-
 type TicketFilter = 'all' | 'active' | 'needs_help' | 'completed'
 
 export default function TicketBoard({
@@ -125,109 +114,33 @@ export default function TicketBoard({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <div style={ticketFilterStyle}>
           <button
-            style={filterButtonStyle(filter === 'all')}
+            className={filter === 'all' ? 'btn btn--primary btn--sm' : 'btn btn--secondary btn--sm'}
             onClick={() => setFilter('all')}
-            onMouseEnter={(e) => {
-              if (filter !== 'all') {
-                e.currentTarget.style.backgroundColor = '#e5e7eb';
-                e.currentTarget.style.transform = 'scale(1.02)';
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (filter !== 'all') {
-                e.currentTarget.style.backgroundColor = '#f3f4f6';
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = 'none';
-              }
-            }}
           >
             All
           </button>
           <button
-            style={filterButtonStyle(filter === 'active')}
+            className={filter === 'active' ? 'btn btn--primary btn--sm' : 'btn btn--secondary btn--sm'}
             onClick={() => setFilter('active')}
-            onMouseEnter={(e) => {
-              if (filter !== 'active') {
-                e.currentTarget.style.backgroundColor = '#e5e7eb';
-                e.currentTarget.style.transform = 'scale(1.02)';
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (filter !== 'active') {
-                e.currentTarget.style.backgroundColor = '#f3f4f6';
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = 'none';
-              }
-            }}
           >
             Active
           </button>
           <button
-            style={filterButtonStyle(filter === 'needs_help')}
+            className={filter === 'needs_help' ? 'btn btn--primary btn--sm' : 'btn btn--secondary btn--sm'}
             onClick={() => setFilter('needs_help')}
-            onMouseEnter={(e) => {
-              if (filter !== 'needs_help') {
-                e.currentTarget.style.backgroundColor = '#e5e7eb';
-                e.currentTarget.style.transform = 'scale(1.02)';
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (filter !== 'needs_help') {
-                e.currentTarget.style.backgroundColor = '#f3f4f6';
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = 'none';
-              }
-            }}
           >
             Needs Help
           </button>
           <button
-            style={filterButtonStyle(filter === 'completed')}
+            className={filter === 'completed' ? 'btn btn--primary btn--sm' : 'btn btn--secondary btn--sm'}
             onClick={() => setFilter('completed')}
-            onMouseEnter={(e) => {
-              if (filter !== 'completed') {
-                e.currentTarget.style.backgroundColor = '#e5e7eb';
-                e.currentTarget.style.transform = 'scale(1.02)';
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (filter !== 'completed') {
-                e.currentTarget.style.backgroundColor = '#f3f4f6';
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = 'none';
-              }
-            }}
           >
             Completed
           </button>
         </div>
         <button
+          className="btn btn--success"
           onClick={onCreateTicket}
-          style={{
-            padding: '8px 16px',
-            backgroundColor: '#10b981',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontWeight: 500,
-            fontSize: '14px',
-            transition: 'all 0.2s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = '#059669';
-            e.currentTarget.style.transform = 'scale(1.02)';
-            e.currentTarget.style.boxShadow = isDarkMode ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.15)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = '#10b981';
-            e.currentTarget.style.transform = 'scale(1)';
-            e.currentTarget.style.boxShadow = 'none';
-          }}
         >
           + New Ticket
         </button>
@@ -244,28 +157,9 @@ export default function TicketBoard({
               </span>
             </div>
             <button
+              className="btn btn--warning btn--sm"
               onClick={() => onSpawnAgent('assigner', 'Check for unassigned tickets and assign them to the appropriate agents based on their descriptions.')}
-              style={{
-                padding: '4px 8px',
-                fontSize: '11px',
-                backgroundColor: '#f59e0b',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
               title="Run Assigner agent to auto-assign tickets"
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#d97706';
-                e.currentTarget.style.transform = 'scale(1.02)';
-                e.currentTarget.style.boxShadow = isDarkMode ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.15)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#f59e0b';
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
             >
               Auto-Assign
             </button>
@@ -314,32 +208,12 @@ export default function TicketBoard({
                   </div>
                 </div>
                 <button
+                  className="btn btn--sm"
                   onClick={() => onSpawnAgent(agent.id)}
                   disabled={agent.status === 'running'}
                   style={{
-                    padding: '4px 8px',
-                    fontSize: '11px',
                     backgroundColor: agent.status === 'running' ? '#9ca3af' : agent.color,
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: agent.status === 'running' ? 'not-allowed' : 'pointer',
-                    opacity: agent.status === 'running' ? 0.5 : 1,
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (agent.status !== 'running') {
-                      e.currentTarget.style.filter = 'brightness(0.85)';
-                      e.currentTarget.style.transform = 'scale(1.02)';
-                      e.currentTarget.style.boxShadow = isDarkMode ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.15)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (agent.status !== 'running') {
-                      e.currentTarget.style.filter = 'brightness(1)';
-                      e.currentTarget.style.transform = 'scale(1)';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }
+                    color: 'white'
                   }}
                 >
                   {agent.status === 'running' ? 'Running...' : 'Run'}
@@ -365,13 +239,6 @@ export default function TicketBoard({
           )
         })}
       </div>
-
-      <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.5; }
-        }
-      `}</style>
 
       <TicketDetailDialog
         ticket={selectedTicket}

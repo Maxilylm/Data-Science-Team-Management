@@ -1,4 +1,4 @@
-import type { Agent, Task, KanbanData, Ticket, TicketPriority, Project, BrowseResult } from '../types'
+import type { Agent, Task, Ticket, TicketPriority, Project, BrowseResult } from '../types'
 
 const BASE_URL = '/api'
 const TOKEN_KEY = 'dashboard-auth-token'
@@ -112,14 +112,6 @@ export const api = {
     return fetchJson(`${BASE_URL}/tasks`)
   },
 
-  getKanbanTasks(): Promise<KanbanData> {
-    return fetchJson(`${BASE_URL}/tasks/kanban`)
-  },
-
-  getTasksNeedingInput(): Promise<Task[]> {
-    return fetchJson(`${BASE_URL}/tasks/needs-input`)
-  },
-
   getTasksByAgent(agentId: string): Promise<Task[]> {
     return fetchJson(`${BASE_URL}/tasks/agent/${agentId}`)
   },
@@ -182,14 +174,6 @@ export const api = {
 
   getTicketsByAgent(agentId: string): Promise<Ticket[]> {
     return fetchJson(`${BASE_URL}/tickets/agent/${agentId}`)
-  },
-
-  getUnassignedTickets(): Promise<Ticket[]> {
-    return fetchJson(`${BASE_URL}/tickets/unassigned`)
-  },
-
-  getTicketsSummary(): Promise<{ total: number; unassigned: number; pending: number; inProgress: number; needsHelp: number; completed: number }> {
-    return fetchJson(`${BASE_URL}/tickets/summary`)
   },
 
   createTicket(ticket: { title: string; description: string; assignedTo?: string; priority?: TicketPriority; tags?: string[] }): Promise<Ticket> {

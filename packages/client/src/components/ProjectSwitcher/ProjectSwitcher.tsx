@@ -39,7 +39,6 @@ export function ProjectSwitcher({
   }, [])
 
   const bg = isDarkMode ? '#374151' : '#f3f4f6'
-  const hoverBg = isDarkMode ? '#4b5563' : '#e5e7eb'
   const text = isDarkMode ? '#e5e7eb' : '#1f2937'
   const subText = isDarkMode ? '#9ca3af' : '#6b7280'
   const dropdownBg = isDarkMode ? '#1f2937' : '#ffffff'
@@ -98,24 +97,13 @@ export function ProjectSwitcher({
                     if (!isActive) onActivate(project.id)
                     setIsOpen(false)
                   }}
+                  className="btn btn--ghost btn--sm"
                   style={{
-                    display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'flex-start',
                     width: '100%',
-                    padding: '8px 12px',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    backgroundColor: isActive ? (isDarkMode ? '#1e3a5f' : '#dbeafe') : 'transparent',
-                    color: text,
-                    textAlign: 'left'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isActive) e.currentTarget.style.backgroundColor = hoverBg
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isActive) e.currentTarget.style.backgroundColor = 'transparent'
+                    backgroundColor: isActive ? (isDarkMode ? '#1e3a5f' : '#dbeafe') : undefined,
+                    color: text
                   }}
                 >
                   <span style={{ fontWeight: 500, fontSize: '13px' }}>
@@ -135,20 +123,12 @@ export function ProjectSwitcher({
                 setIsOpen(false)
                 onManageProjects()
               }}
+              className="btn btn--ghost btn--sm"
               style={{
                 width: '100%',
-                padding: '8px 12px',
-                border: 'none',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                backgroundColor: 'transparent',
                 color: '#3b82f6',
-                fontWeight: 500,
-                fontSize: '13px',
-                textAlign: 'left'
+                justifyContent: 'flex-start'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = hoverBg}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
             >
               Manage Projects...
             </button>
