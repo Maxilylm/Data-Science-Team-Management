@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 
+export type SSEStatus = 'connected' | 'reconnecting' | 'disconnected'
+
 interface UseSSEOptions {
   onMessage?: (data: any) => void
   onError?: (error: Event) => void
@@ -9,7 +11,7 @@ interface UseSSEOptions {
 const MAX_BACKOFF_MS = 30_000
 
 export function useSSE(url: string, options: UseSSEOptions = {}) {
-  const [isConnected, setIsConnected] = useState(false)
+  const [status, setStatus] = useState<SSEStatus>('reconnecting')
   const [lastEvent, setLastEvent] = useState<any>(null)
   const eventSourceRef = useRef<EventSource | null>(null)
   const retryRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -33,7 +35,7 @@ export function useSSE(url: string, options: UseSSEOptions = {}) {
     eventSourceRef.current = es
 
     es.addEventListener('open', () => {
-      setIsConnected(true)
+      setStatus('connected')
       backoffRef.current = 1000
       optionsRef.current.onOpen?.()
     })
@@ -49,7 +51,7 @@ export function useSSE(url: string, options: UseSSEOptions = {}) {
     })
 
     es.addEventListener('error', (event) => {
-      setIsConnected(false)
+      setStatus('reconnecting')
       es.close()
       optionsRef.current.onError?.(event)
 
@@ -64,9 +66,12 @@ export function useSSE(url: string, options: UseSSEOptions = {}) {
 
     return () => {
       eventSourceRef.current?.close()
-      if (retryRef.current) clearTimeout(retryRef.current)
+      if (retryRef.current) {
+        clearTimeout(retryRef.current)
+        setStatus('disconnected')
+      }
     }
   }, [connect])
 
-  return { isConnected, lastEvent, reconnect: connect }
+  return { isConnected: status === 'connected', status, lastEvent, reconnect: connect }
 }
