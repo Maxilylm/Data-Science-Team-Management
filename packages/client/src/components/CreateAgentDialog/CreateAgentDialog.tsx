@@ -167,36 +167,14 @@ export default function CreateAgentDialog({ isOpen, onSubmit, onClose, isDarkMod
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
           <button
             onClick={onClose}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: isDarkMode ? '#4b5563' : '#f3f4f6',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              transition: 'background-color 0.2s',
-              color: isDarkMode ? '#e5e7eb' : 'inherit'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isDarkMode ? '#6b7280' : '#e5e7eb'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isDarkMode ? '#4b5563' : '#f3f4f6'}
+            className="btn btn--secondary"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={!isValid}
-            style={{
-              padding: '10px 20px',
-              backgroundColor: isValid ? '#3b82f6' : '#9ca3af',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: isValid ? 'pointer' : 'not-allowed',
-              fontSize: '14px',
-              transition: 'background-color 0.2s'
-            }}
-            onMouseEnter={(e) => { if (isValid) e.currentTarget.style.backgroundColor = '#2563eb' }}
-            onMouseLeave={(e) => { if (isValid) e.currentTarget.style.backgroundColor = '#3b82f6' }}
+            className="btn btn--primary"
           >
             Create Agent
           </button>

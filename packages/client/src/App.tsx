@@ -5,6 +5,7 @@ import { useTickets } from './hooks/useTickets'
 import { useProjects } from './hooks/useProjects'
 import { useSSE } from './hooks/useSSE'
 import { useAuth } from './hooks/useAuth'
+import { useDocumentTitle } from './hooks/useDocumentTitle'
 import { AgentPanel } from './components/AgentPanel'
 import { TicketBoard } from './components/TicketBoard'
 import { PromptDialog } from './components/PromptDialog'
@@ -13,11 +14,14 @@ import { LiveFeed } from './components/LiveFeed'
 import { CreateAgentDialog } from './components/CreateAgentDialog'
 import { CreateTicketDialog } from './components/CreateTicketDialog'
 import { ProjectSwitcher } from './components/ProjectSwitcher/ProjectSwitcher'
+import { ConnectionDot } from './components/ConnectionDot/ConnectionDot'
 import { ProjectManager } from './components/ProjectManager/ProjectManager'
 import { LoginScreen } from './components/LoginScreen/LoginScreen'
 import { Settings } from './pages/Settings/Settings'
 import NeedsInputPanel from './components/NeedsInputPanel'
 import ConfirmDialog from './components/ConfirmDialog'
+import Toast from './components/Toast'
+import { useToast } from './hooks/useToast'
 import type { Agent, TicketPriority } from './types'
 
 interface FeedEvent {
@@ -71,11 +75,13 @@ const statBadgeStyle = (color: string): React.CSSProperties => ({
 })
 
 export default function App() {
-  const { agents, spawnAgent, stopAgent, sendInput, createAgent, deleteAgent } = useAgents()
+  const toast = useToast()
+  const { agents, spawnAgent, stopAgent, sendInput, createAgent, deleteAgent } = useAgents({ onError: toast.error })
   const { tasksNeedingInput, refetch: refetchTasks } = useTasks()
-  const { tickets, unassignedTickets, summary, createTicket, updateTicket, assignTicket, deleteTicket, answerTicket, refetch: refetchTickets } = useTickets()
-  const { projects, activeProject, activeProjectId, activateProject, createProject, initializeProject, deleteProject, isActivating } = useProjects()
+  const { tickets, unassignedTickets, summary, createTicket, updateTicket, assignTicket, deleteTicket, answerTicket, refetch: refetchTickets } = useTickets({ onError: toast.error })
+  const { projects, activeProject, activeProjectId, activateProject, createProject, initializeProject, deleteProject, isActivating } = useProjects({ onError: toast.error })
   const auth = useAuth()
+  useDocumentTitle(summary.inProgress + summary.needsHelp)
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
   const [feedEvents, setFeedEvents] = useState<FeedEvent[]>([])
   const [showCreateAgentDialog, setShowCreateAgentDialog] = useState(false)
@@ -116,7 +122,7 @@ export default function App() {
     refetchTickets()
   }, [refetchTasks, refetchTickets])
 
-  useSSE('/api/events', { onMessage: handleSSEMessage })
+  const { status: sseStatus } = useSSE('/api/events', { onMessage: handleSSEMessage })
 
   const handleSpawnAgent = (agentId: string, prompt?: string) => {
     if (prompt) {
@@ -220,9 +226,12 @@ export default function App() {
       <div style={mainStyle}>
         <header style={getHeaderStyle(isDarkMode)}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <h1 style={{ fontSize: '24px', fontWeight: 700, margin: 0 }}>
-              Agent Team Dashboard
-            </h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h1 style={{ fontSize: '24px', fontWeight: 700, margin: 0 }}>
+                Agent Team Dashboard
+              </h1>
+              <ConnectionDot status={sseStatus} />
+            </div>
             <ProjectSwitcher
               projects={projects}
               activeProject={activeProject}
@@ -232,7 +241,7 @@ export default function App() {
               isDarkMode={isDarkMode}
             />
           </div>
-          <div style={statsStyle}>
+          <div style={statsStyle} role="status" aria-live="polite" aria-label="Dashboard statistics">
             <div style={statBadgeStyle('#10b981')}>
               <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#10b981' }} />
               {activeAgentsCount} active
@@ -263,22 +272,12 @@ export default function App() {
               Settings
             </button>
             <button
+              className="btn btn--ghost btn--sm"
               onClick={toggleDarkMode}
-              style={{
-                background: 'none',
-                border: 'none',
-                fontSize: '20px',
-                cursor: 'pointer',
-                padding: '4px 8px',
-                borderRadius: '6px',
-                transition: 'background-color 0.2s',
-                backgroundColor: isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)'}
-              title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              style={{ fontSize: '20px' }}
+              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
             >
-              {isDarkMode ? 'L' : 'D'}
+              {isDarkMode ? '\u2600' : '\u263D'}
             </button>
           </div>
         </header>
@@ -358,6 +357,7 @@ export default function App() {
         onCancel={() => setDeleteAgentConfirm(null)}
         isDarkMode={isDarkMode}
       />
+      <Toast toasts={toast.toasts} onDismiss={toast.dismissToast} isDarkMode={isDarkMode} />
     </div>
   )
 }

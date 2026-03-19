@@ -1,0 +1,76 @@
+/* ConnectionDot — SSE connection health indicator */
+
+.connection-dot {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+}
+
+/* The solid dot */
+.connection-dot__core {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full, 9999px);
+  transition: background-color var(--transition-slow, 0.3s ease);
+}
+
+/* The ripple ring (only visible when connected) */
+.connection-dot__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-full, 9999px);
+  animation: none;
+  opacity: 0;
+}
+
+/* ── Connected: green pulse ── */
+.connection-dot--connected .connection-dot__core {
+  background-color: var(--color-success, #10b981);
+}
+
+.connection-dot--connected .connection-dot__ring {
+  background-color: var(--color-success, #10b981);
+  opacity: 0.6;
+  animation: dot-pulse 2s ease-out infinite;
+}
+
+/* ── Reconnecting: amber blink ── */
+.connection-dot--reconnecting .connection-dot__core {
+  background-color: var(--color-warning, #f59e0b);
+  animation: dot-blink 1s ease-in-out infinite;
+}
+
+/* ── Disconnected: red, static ── */
+.connection-dot--disconnected .connection-dot__core {
+  background-color: var(--color-danger, #ef4444);
+}
+
+/* ── Animations ── */
+
+@keyframes dot-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  70% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+@keyframes dot-blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}

@@ -67,7 +67,7 @@ function getEventIcon(type: string): string {
 export default function LiveFeed({ events, maxEvents = 100, onAnswerQuestion, isDarkMode = false }: LiveFeedProps) {
   const [expanded, setExpanded] = useState(true)
   const [selectedEvent, setSelectedEvent] = useState<number | null>(null)
-  const [answerInputs, setAnswerInputs] = useState<Record<number, string>>({})
+  const [answerInputs, setAnswerInputs] = useState<Record<string, string>>({})
   const feedRef = useRef<HTMLDivElement>(null)
   const displayEvents = events.slice(-maxEvents)
 
@@ -126,9 +126,11 @@ export default function LiveFeed({ events, maxEvents = 100, onAnswerQuestion, is
               Waiting for activity...
             </div>
           ) : (
-            displayEvents.map((event, i) => (
+            displayEvents.map((event, i) => {
+              const eventKey = `${event.timestamp.getTime()}-${event.type}-${i}`
+              return (
               <div
-                key={i}
+                key={eventKey}
                 style={{
                   ...getEventStyle(isDarkMode),
                   backgroundColor: selectedEvent === i ? (isDarkMode ? '#374151' : '#e5e7eb') : 'transparent',
@@ -191,12 +193,12 @@ export default function LiveFeed({ events, maxEvents = 100, onAnswerQuestion, is
                         <input
                           type="text"
                           placeholder="Quick answer..."
-                          value={answerInputs[i] || ''}
-                          onChange={(e) => setAnswerInputs(prev => ({ ...prev, [i]: e.target.value }))}
+                          value={answerInputs[eventKey] || ''}
+                          onChange={(e) => setAnswerInputs(prev => ({ ...prev, [eventKey]: e.target.value }))}
                           onKeyDown={(e) => {
-                            if (e.key === 'Enter' && answerInputs[i]?.trim() && event.ticketId) {
-                              onAnswerQuestion(event.ticketId, answerInputs[i].trim())
-                              setAnswerInputs(prev => ({ ...prev, [i]: '' }))
+                            if (e.key === 'Enter' && answerInputs[eventKey]?.trim() && event.ticketId) {
+                              onAnswerQuestion(event.ticketId, answerInputs[eventKey].trim())
+                              setAnswerInputs(prev => ({ ...prev, [eventKey]: '' }))
                             }
                           }}
                           style={{
@@ -213,20 +215,20 @@ export default function LiveFeed({ events, maxEvents = 100, onAnswerQuestion, is
                         <button
                           onClick={(e) => {
                             e.stopPropagation()
-                            if (answerInputs[i]?.trim() && event.ticketId) {
-                              onAnswerQuestion(event.ticketId, answerInputs[i].trim())
-                              setAnswerInputs(prev => ({ ...prev, [i]: '' }))
+                            if (answerInputs[eventKey]?.trim() && event.ticketId) {
+                              onAnswerQuestion(event.ticketId, answerInputs[eventKey].trim())
+                              setAnswerInputs(prev => ({ ...prev, [eventKey]: '' }))
                             }
                           }}
-                          disabled={!answerInputs[i]?.trim()}
+                          disabled={!answerInputs[eventKey]?.trim()}
                           style={{
                             padding: '6px 12px',
                             fontSize: '12px',
-                            backgroundColor: answerInputs[i]?.trim() ? '#16a34a' : (isDarkMode ? '#4b5563' : '#9ca3af'),
+                            backgroundColor: answerInputs[eventKey]?.trim() ? '#16a34a' : (isDarkMode ? '#4b5563' : '#9ca3af'),
                             color: 'white',
                             border: 'none',
                             borderRadius: '4px',
-                            cursor: answerInputs[i]?.trim() ? 'pointer' : 'not-allowed'
+                            cursor: answerInputs[eventKey]?.trim() ? 'pointer' : 'not-allowed'
                           }}
                         >
                           Send
@@ -236,7 +238,7 @@ export default function LiveFeed({ events, maxEvents = 100, onAnswerQuestion, is
                   </div>
                 </div>
               </div>
-            ))
+            )})
           )}
         </div>
       )}

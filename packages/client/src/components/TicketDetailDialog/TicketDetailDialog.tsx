@@ -47,11 +47,11 @@ const getLabelStyle = (isDark: boolean): React.CSSProperties => ({
 })
 
 
-const priorityButtonStyle = (selected: boolean, color: string, isHovered: boolean = false, isDark: boolean = false): React.CSSProperties => ({
+const priorityButtonStyle = (selected: boolean, color: string, isDark: boolean = false): React.CSSProperties => ({
   padding: '6px 12px',
   border: `2px solid ${selected ? color : (isDark ? '#4b5563' : '#e5e7eb')}`,
   borderRadius: '6px',
-  backgroundColor: selected ? color + '20' : (isHovered ? (isDark ? '#374151' : '#f9fafb') : (isDark ? '#1f2937' : 'white')),
+  backgroundColor: selected ? color + '20' : (isDark ? '#1f2937' : 'white'),
   color: selected ? color : (isDark ? '#9ca3af' : '#6b7280'),
   cursor: 'pointer',
   fontWeight: 500,
@@ -60,11 +60,11 @@ const priorityButtonStyle = (selected: boolean, color: string, isHovered: boolea
   flex: 1
 })
 
-const statusButtonStyle = (selected: boolean, statusColor: { bg: string; text: string }, isHovered: boolean = false, isDark: boolean = false): React.CSSProperties => ({
+const statusButtonStyle = (selected: boolean, statusColor: { bg: string; text: string }, isDark: boolean = false): React.CSSProperties => ({
   padding: '6px 12px',
   border: `2px solid ${selected ? statusColor.text : (isDark ? '#4b5563' : '#e5e7e7')}`,
   borderRadius: '6px',
-  backgroundColor: selected ? statusColor.bg : (isHovered ? (isDark ? '#374151' : '#f9fafb') : (isDark ? '#1f2937' : 'white')),
+  backgroundColor: selected ? statusColor.bg : (isDark ? '#1f2937' : 'white'),
   color: selected ? statusColor.text : (isDark ? '#9ca3af' : '#6b7280'),
   cursor: 'pointer',
   fontWeight: 500,
@@ -82,8 +82,6 @@ export default function TicketDetailDialog({ ticket, isOpen, onClose, onUpdate, 
   const [editedPriority, setEditedPriority] = useState<TicketPriority>('medium')
   const [editedStatus, setEditedStatus] = useState<TicketStatus>('unassigned')
   const [editedTagsInput, setEditedTagsInput] = useState('')
-  const [hoveredPriority, setHoveredPriority] = useState<TicketPriority | null>(null)
-  const [hoveredStatus, setHoveredStatus] = useState<TicketStatus | null>(null)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   if (!isOpen || !ticket) return null
@@ -199,9 +197,7 @@ export default function TicketDetailDialog({ ticket, isOpen, onClose, onUpdate, 
                     key={p}
                     type="button"
                     onClick={() => setEditedPriority(p)}
-                    style={priorityButtonStyle(editedPriority === p, priorityColors[p], hoveredPriority === p, isDarkMode)}
-                    onMouseEnter={() => setHoveredPriority(p)}
-                    onMouseLeave={() => setHoveredPriority(null)}
+                    style={priorityButtonStyle(editedPriority === p, priorityColors[p], isDarkMode)}
                   >
                     {p.charAt(0).toUpperCase() + p.slice(1)}
                   </button>
@@ -217,9 +213,7 @@ export default function TicketDetailDialog({ ticket, isOpen, onClose, onUpdate, 
                     key={s}
                     type="button"
                     onClick={() => setEditedStatus(s)}
-                    style={statusButtonStyle(editedStatus === s, statusColors[s], hoveredStatus === s, isDarkMode)}
-                    onMouseEnter={() => setHoveredStatus(s)}
-                    onMouseLeave={() => setHoveredStatus(null)}
+                    style={statusButtonStyle(editedStatus === s, statusColors[s], isDarkMode)}
                   >
                     {s.replace('_', ' ').toUpperCase()}
                   </button>
@@ -397,19 +391,7 @@ export default function TicketDetailDialog({ ticket, isOpen, onClose, onUpdate, 
             {!isEditing && onDelete && (
               <button
                 onClick={handleDelete}
-                style={{
-                  padding: '10px 20px',
-                  border: 'none',
-                  borderRadius: '6px',
-                  backgroundColor: '#ef4444',
-                  color: 'white',
-                  cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: 500,
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
-                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ef4444'}
+                className="btn btn--danger"
               >
                 Delete
               </button>
@@ -420,38 +402,14 @@ export default function TicketDetailDialog({ ticket, isOpen, onClose, onUpdate, 
               <>
                 <button
                   onClick={handleCancel}
-                  style={{
-                    padding: '10px 20px',
-                    border: isDarkMode ? '1px solid #4b5563' : '1px solid #d1d5db',
-                    borderRadius: '6px',
-                    backgroundColor: isDarkMode ? '#374151' : 'white',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    transition: 'background-color 0.2s',
-                    color: isDarkMode ? '#e5e7eb' : 'inherit'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isDarkMode ? '#4b5563' : '#f9fafb'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isDarkMode ? '#374151' : 'white'}
+                  className="btn btn--secondary"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSave}
                   disabled={!editedTitle.trim()}
-                  style={{
-                    padding: '10px 20px',
-                    border: 'none',
-                    borderRadius: '6px',
-                    backgroundColor: editedTitle.trim() ? '#10b981' : '#9ca3af',
-                    color: 'white',
-                    cursor: editedTitle.trim() ? 'pointer' : 'not-allowed',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    transition: 'background-color 0.2s'
-                  }}
-                  onMouseEnter={(e) => { if (editedTitle.trim()) e.currentTarget.style.backgroundColor = '#059669' }}
-                  onMouseLeave={(e) => { if (editedTitle.trim()) e.currentTarget.style.backgroundColor = '#10b981' }}
+                  className="btn btn--success"
                 >
                   Save Changes
                 </button>
@@ -460,38 +418,14 @@ export default function TicketDetailDialog({ ticket, isOpen, onClose, onUpdate, 
               <>
                 <button
                   onClick={onClose}
-                  style={{
-                    padding: '10px 20px',
-                    border: isDarkMode ? '1px solid #4b5563' : '1px solid #d1d5db',
-                    borderRadius: '6px',
-                    backgroundColor: isDarkMode ? '#374151' : 'white',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: 500,
-                    transition: 'background-color 0.2s',
-                    color: isDarkMode ? '#e5e7eb' : 'inherit'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = isDarkMode ? '#4b5563' : '#f9fafb'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = isDarkMode ? '#374151' : 'white'}
+                  className="btn btn--secondary"
                 >
                   Close
                 </button>
                 {onUpdate && (
                   <button
                     onClick={handleEdit}
-                    style={{
-                      padding: '10px 20px',
-                      border: 'none',
-                      borderRadius: '6px',
-                      backgroundColor: '#3b82f6',
-                      color: 'white',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      fontWeight: 500,
-                      transition: 'background-color 0.2s'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3b82f6'}
+                    className="btn btn--primary"
                   >
                     Edit
                   </button>
