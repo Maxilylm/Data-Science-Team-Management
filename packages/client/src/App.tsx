@@ -5,6 +5,7 @@ import { useTickets } from './hooks/useTickets'
 import { useProjects } from './hooks/useProjects'
 import { useSSE } from './hooks/useSSE'
 import { useAuth } from './hooks/useAuth'
+import { useDocumentTitle } from './hooks/useDocumentTitle'
 import { AgentPanel } from './components/AgentPanel'
 import { TicketBoard } from './components/TicketBoard'
 import { PromptDialog } from './components/PromptDialog'
@@ -13,6 +14,7 @@ import { LiveFeed } from './components/LiveFeed'
 import { CreateAgentDialog } from './components/CreateAgentDialog'
 import { CreateTicketDialog } from './components/CreateTicketDialog'
 import { ProjectSwitcher } from './components/ProjectSwitcher/ProjectSwitcher'
+import { ConnectionDot } from './components/ConnectionDot/ConnectionDot'
 import { ProjectManager } from './components/ProjectManager/ProjectManager'
 import { LoginScreen } from './components/LoginScreen/LoginScreen'
 import { Settings } from './pages/Settings/Settings'
@@ -79,6 +81,7 @@ export default function App() {
   const { tickets, unassignedTickets, summary, createTicket, updateTicket, assignTicket, deleteTicket, answerTicket, refetch: refetchTickets } = useTickets({ onError: toast.error })
   const { projects, activeProject, activeProjectId, activateProject, createProject, initializeProject, deleteProject, isActivating } = useProjects({ onError: toast.error })
   const auth = useAuth()
+  useDocumentTitle(summary.inProgress + summary.needsHelp)
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null)
   const [feedEvents, setFeedEvents] = useState<FeedEvent[]>([])
   const [showCreateAgentDialog, setShowCreateAgentDialog] = useState(false)
@@ -119,7 +122,7 @@ export default function App() {
     refetchTickets()
   }, [refetchTasks, refetchTickets])
 
-  useSSE('/api/events', { onMessage: handleSSEMessage })
+  const { status: sseStatus } = useSSE('/api/events', { onMessage: handleSSEMessage })
 
   const handleSpawnAgent = (agentId: string, prompt?: string) => {
     if (prompt) {
@@ -223,9 +226,12 @@ export default function App() {
       <div style={mainStyle}>
         <header style={getHeaderStyle(isDarkMode)}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <h1 style={{ fontSize: '24px', fontWeight: 700, margin: 0 }}>
-              Agent Team Dashboard
-            </h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h1 style={{ fontSize: '24px', fontWeight: 700, margin: 0 }}>
+                Agent Team Dashboard
+              </h1>
+              <ConnectionDot status={sseStatus} />
+            </div>
             <ProjectSwitcher
               projects={projects}
               activeProject={activeProject}
