@@ -58,16 +58,7 @@ export default function InputRequired({ tasks, onSubmitInput }: InputRequiredPro
                     <button
                       key={i}
                       onClick={() => task.agentId && onSubmitInput(task.agentId, option)}
-                      style={{
-                        padding: '6px 12px',
-                        backgroundColor: '#f3f4f6',
-                        border: '1px solid #d1d5db',
-                        borderRadius: '4px',
-                        cursor: 'pointer',
-                        transition: 'background-color 0.2s'
-                      }}
-                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e5e7eb'}
-                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                      className="btn btn--secondary btn--sm"
                     >
                       {option}
                     </button>
@@ -90,17 +81,7 @@ export default function InputRequired({ tasks, onSubmitInput }: InputRequiredPro
                   />
                   <button
                     onClick={() => handleSubmit(task)}
-                    style={{
-                      padding: '8px 16px',
-                      backgroundColor: '#3b82f6',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.2s'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#3b82f6'}
+                    className="btn btn--primary btn--sm"
                   >
                     Send
                   </button>

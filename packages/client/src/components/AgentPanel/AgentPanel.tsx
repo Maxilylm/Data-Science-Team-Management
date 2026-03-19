@@ -43,18 +43,7 @@ export default function AgentPanel({ agents, onSpawnAgent, onStopAgent, onDelete
         {onCreateAgent && (
           <button
             onClick={onCreateAgent}
-            style={{
-              padding: '6px 12px',
-              backgroundColor: '#10b981',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '13px',
-              transition: 'background-color 0.2s'
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#059669'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#10b981'}
+            className="btn btn--success btn--sm"
           >
             + New
           </button>

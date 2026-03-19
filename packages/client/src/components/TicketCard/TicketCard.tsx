@@ -19,8 +19,6 @@ const getCardStyle = (isDark: boolean): React.CSSProperties => ({
   padding: '12px',
   boxShadow: isDark ? '0 1px 3px rgba(0,0,0,0.3)' : '0 1px 3px rgba(0,0,0,0.1)',
   marginBottom: '8px',
-  cursor: 'pointer',
-  transition: 'all 0.2s',
   borderLeft: '4px solid transparent',
   color: isDark ? '#e5e7eb' : 'inherit'
 })
@@ -40,25 +38,19 @@ export default function TicketCard({ ticket, onAssign, onStatusChange: _onStatus
 
   return (
     <div
+      className="card--interactive"
       style={{
         ...getCardStyle(isDarkMode),
         borderLeftColor: priorityColors[ticket.priority]
       }}
       onClick={() => onClick?.(ticket)}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'
-        e.currentTarget.style.transform = 'translateY(-1px)'
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)'
-        e.currentTarget.style.transform = 'translateY(0)'
-      }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
         <h4 style={{ fontSize: '14px', fontWeight: 600, margin: 0, flex: 1 }}>
           {ticket.title}
         </h4>
         <span
+          role="status"
           style={{
             fontSize: '10px',
             padding: '2px 6px',
@@ -101,28 +93,8 @@ export default function TicketCard({ ticket, onAssign, onStatusChange: _onStatus
 
           {onAnswer && !showAnswerInput && (
             <button
+              className="btn btn--danger btn--sm"
               onClick={(e) => { e.stopPropagation(); setShowAnswerInput(true); }}
-              style={{
-                padding: '6px 12px',
-                backgroundColor: '#dc2626',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '12px',
-                fontWeight: 500,
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#b91c1c';
-                e.currentTarget.style.transform = 'scale(1.02)';
-                e.currentTarget.style.boxShadow = isDarkMode ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.15)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#dc2626';
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
             >
               Answer & Resume
             </button>
@@ -150,57 +122,18 @@ export default function TicketCard({ ticket, onAssign, onStatusChange: _onStatus
               />
               <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
                 <button
+                  className="btn btn--success btn--sm"
                   onClick={handleAnswer}
                   disabled={!answerText.trim()}
-                  style={{
-                    padding: '6px 12px',
-                    backgroundColor: answerText.trim() ? '#16a34a' : '#9ca3af',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: answerText.trim() ? 'pointer' : 'not-allowed',
-                    fontSize: '12px',
-                    fontWeight: 500,
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (answerText.trim()) {
-                      e.currentTarget.style.backgroundColor = '#15803d';
-                      e.currentTarget.style.transform = 'scale(1.02)';
-                      e.currentTarget.style.boxShadow = isDarkMode ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.15)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (answerText.trim()) {
-                      e.currentTarget.style.backgroundColor = '#16a34a';
-                      e.currentTarget.style.transform = 'scale(1)';
-                      e.currentTarget.style.boxShadow = 'none';
-                    }
-                  }}
                 >
                   Send Answer
                 </button>
                 <button
+                  className="btn btn--secondary btn--sm"
                   onClick={() => { setShowAnswerInput(false); setAnswerText(''); }}
                   style={{
-                    padding: '6px 12px',
-                    backgroundColor: isDarkMode ? '#4b5563' : '#f3f4f6',
-                    color: isDarkMode ? '#e5e7eb' : '#374151',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = isDarkMode ? '#6b7280' : '#e5e7eb';
-                    e.currentTarget.style.transform = 'scale(1.02)';
-                    e.currentTarget.style.boxShadow = isDarkMode ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = isDarkMode ? '#4b5563' : '#f3f4f6';
-                    e.currentTarget.style.transform = 'scale(1)';
-                    e.currentTarget.style.boxShadow = 'none';
+                    backgroundColor: isDarkMode ? '#4b5563' : undefined,
+                    color: isDarkMode ? '#e5e7eb' : undefined
                   }}
                 >
                   Cancel
@@ -237,27 +170,9 @@ export default function TicketCard({ ticket, onAssign, onStatusChange: _onStatus
         <div style={{ display: 'flex', gap: '4px' }}>
           {!ticket.assignedTo && onAssign && (
             <button
+              className="btn btn--primary btn--sm"
+              aria-label={`Assign ticket: ${ticket.title}`}
               onClick={(e) => { e.stopPropagation(); onAssign(ticket.id); }}
-              style={{
-                fontSize: '11px',
-                padding: '4px 8px',
-                backgroundColor: '#3b82f6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#2563eb';
-                e.currentTarget.style.transform = 'scale(1.02)';
-                e.currentTarget.style.boxShadow = isDarkMode ? '0 2px 8px rgba(0,0,0,0.4)' : '0 2px 8px rgba(0,0,0,0.15)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = '#3b82f6';
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
             >
               Assign
             </button>

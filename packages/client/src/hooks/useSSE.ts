@@ -6,13 +6,16 @@ interface UseSSEOptions {
   onOpen?: () => void
 }
 
+const MAX_BACKOFF_MS = 30_000
+
 export function useSSE(url: string, options: UseSSEOptions = {}) {
   const [isConnected, setIsConnected] = useState(false)
   const [lastEvent, setLastEvent] = useState<any>(null)
   const eventSourceRef = useRef<EventSource | null>(null)
+  const retryRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const backoffRef = useRef(1000)
   const optionsRef = useRef(options)
 
-  // Keep options ref up to date without triggering reconnection
   useEffect(() => {
     optionsRef.current = options
   }, [options])
@@ -21,12 +24,17 @@ export function useSSE(url: string, options: UseSSEOptions = {}) {
     if (eventSourceRef.current) {
       eventSourceRef.current.close()
     }
+    if (retryRef.current) {
+      clearTimeout(retryRef.current)
+      retryRef.current = null
+    }
 
     const es = new EventSource(url)
     eventSourceRef.current = es
 
     es.addEventListener('open', () => {
       setIsConnected(true)
+      backoffRef.current = 1000
       optionsRef.current.onOpen?.()
     })
 
@@ -36,21 +44,27 @@ export function useSSE(url: string, options: UseSSEOptions = {}) {
         setLastEvent(data)
         optionsRef.current.onMessage?.(data)
       } catch {
-        // Ignore parse errors
+        console.warn('[SSE] Failed to parse event:', event.data?.slice(0, 100))
       }
     })
 
     es.addEventListener('error', (event) => {
       setIsConnected(false)
+      es.close()
       optionsRef.current.onError?.(event)
+
+      const delay = backoffRef.current
+      backoffRef.current = Math.min(delay * 2, MAX_BACKOFF_MS)
+      retryRef.current = setTimeout(connect, delay)
     })
-  }, [url])  // Only reconnect when URL changes
+  }, [url])
 
   useEffect(() => {
     connect()
 
     return () => {
       eventSourceRef.current?.close()
+      if (retryRef.current) clearTimeout(retryRef.current)
     }
   }, [connect])
 
